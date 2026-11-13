@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game 3 · Grammar Crossword — Grade 6</title>
+<style>
+  :root{
+    --sky1:#4cc3f7; --sky2:#3f7ef7;
+    --board:#ffffff;
+    --ink:#243b6b;
+    --across:#ff7a59;  --across-soft:#ffe6de;
+    --down:#7c5cfc;    --down-soft:#ebe4ff;
+    --sun:#ffce3d;
+    --mint:#2ecc8f;    --mint-soft:#d9f7ec;
+    --bad:#ff5470;     --bad-soft:#ffe1e7;
+    --cell:44px;
+    --radius:14px;
+    --display:'Chalkboard SE','Comic Sans MS','Segoe Print','Trebuchet MS',cursive;
+    --body:'Trebuchet MS','Segoe UI',Verdana,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background:linear-gradient(160deg,var(--sky1) 0%,var(--sky2) 100%);
+    min-height:100vh;
+    padding:18px 14px 40px;
+  }
+  /* floating background letters */
+  .float-letters{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0;}
+  .float-letters span{
+    position:absolute; font-family:var(--display); font-weight:700;
+    color:rgba(255,255,255,.14); user-select:none;
+    animation:drift 16s linear infinite;
+  }
+  @keyframes drift{
+    from{transform:translateY(110vh) rotate(-10deg);}
+    to{transform:translateY(-20vh) rotate(12deg);}
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1200px; margin:0 auto;}
+
+  /* ---------- header ---------- */
+  header{
+    background:var(--sun);
+    border-radius:22px;
+    padding:18px 22px 20px;
+    box-shadow:0 8px 0 rgba(0,0,0,.12);
+    text-align:center;
+    border:4px solid #fff;
+    margin-bottom:18px;
+  }
+  .kicker{
+    display:inline-block; background:#fff; color:var(--ink);
+    font-weight:700; letter-spacing:.14em; font-size:.78rem;
+    padding:4px 14px; border-radius:999px; text-transform:uppercase;
+  }
+  h1{
+    font-family:var(--display);
+    font-size:clamp(1.6rem,4.5vw,2.6rem);
+    margin-top:8px; color:#5b3a00;
+    text-shadow:2px 2px 0 rgba(255,255,255,.7);
+  }
+  .subtitle{font-size:.95rem; color:#7a5300; margin-top:4px; font-weight:600;}
+
+  /* ---------- progress ---------- */
+  .progress-bar{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    flex-wrap:wrap; margin-bottom:16px;
+  }
+  .stars{display:flex; gap:4px; background:rgba(255,255,255,.9); padding:8px 14px;
+    border-radius:999px; box-shadow:0 4px 0 rgba(0,0,0,.10);}
+  .star{font-size:1.25rem; filter:grayscale(1) opacity(.35); transition:transform .3s, filter .3s;}
+  .star.lit{filter:none; animation:starpop .5s ease;}
+  @keyframes starpop{
+    0%{transform:scale(.3) rotate(-30deg);}
+    60%{transform:scale(1.5) rotate(10deg);}
+    100%{transform:scale(1);}
+  }
+  .count-pill{
+    background:#fff; font-weight:800; padding:8px 16px; border-radius:999px;
+    box-shadow:0 4px 0 rgba(0,0,0,.10); font-size:1rem;
+  }
+  .count-pill b{color:var(--across);}
+
+  /* ---------- layout ---------- */
+  .game{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:18px; align-items:start;}
+  @media (max-width:980px){ .game{grid-template-columns:1fr;} }
+
+  .board-card{
+    background:var(--board); border-radius:var(--radius);
+    box-shadow:0 10px 0 rgba(0,0,0,.12);
+    padding:16px; border:4px solid #fff; overflow:hidden;
+  }
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  button.tool{
+    font-family:var(--body); font-weight:800; font-size:.9rem;
+    border:none; border-radius:999px; padding:10px 16px; cursor:pointer;
+    color:#fff; box-shadow:0 4px 0 rgba(0,0,0,.18);
+    transition:transform .08s, box-shadow .08s;
+  }
+  button.tool:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.18);}
+  .btn-check{background:var(--mint);}
+  .btn-hint{background:var(--sun); color:#5b3a00;}
+  .btn-erase{background:#9aa7c7;}
+  .selected-clue{
+    min-height:44px; border-radius:12px; padding:8px 12px; font-size:.92rem;
+    font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px;
+    background:#f1f5ff; border:2px dashed #c9d6f5;
+  }
+  .selected-clue .dirtag{flex:none;}
+
+  .board-scroll{overflow-x:auto; padding-bottom:6px;}
+  #grid{
+    display:grid; gap:4px; width:max-content; margin:0 auto;
+    touch-action:manipulation;
+  }
+  .cell{position:relative; width:var(--cell); height:var(--cell);}
+  .cell.block{visibility:hidden;}
+  .cell input{
+    width:100%; height:100%; text-align:center; text-transform:uppercase;
+    font-family:var(--display); font-size:calc(var(--cell) * .5); font-weight:700;
+    color:var(--ink); background:#fdfaf1;
+    border:3px solid #d8def0; border-radius:10px;
+    outline:none; caret-color:transparent; cursor:pointer; padding:0;
+    transition:background .15s, border-color .15s, transform .1s;
+  }
+  .cell input:focus{border-color:var(--ink); transform:scale(1.06); z-index:2; position:relative;}
+  .cell.hl-a input{background:var(--across-soft); border-color:var(--across);}
+  .cell.hl-d input{background:var(--down-soft);  border-color:var(--down);}
+  .cell.locked input{
+    background:var(--mint); border-color:#1fae77; color:#fff;
+    animation:cellpop .35s ease;
+  }
+  @keyframes cellpop{ 50%{transform:scale(1.18) rotate(3deg);} }
+  .cell.bad input{background:var(--bad-soft); border-color:var(--bad); color:var(--bad); animation:shake .3s;}
+  @keyframes shake{
+    25%{transform:translateX(-3px);} 50%{transform:translateX(3px);} 75%{transform:translateX(-2px);}
+  }
+  .cell .num{
+    position:absolute; top:2px; left:5px; font-size:.62rem; font-weight:800;
+    color:#8b96b5; z-index:3; pointer-events:none;
+  }
+  .cell.locked .num{color:#e8fff5;}
+  /* divider between the two words of a multi-word answer */
+  .cell.break-left input{border-left:6px double var(--across);}
+  .cell.break-top  input{border-top:6px double var(--down);}
+
+  /* ---------- clues ---------- */
+  .clues{display:flex; flex-direction:column; gap:14px;}
+  .clue-card{
+    border-radius:var(--radius); padding:14px 14px 10px;
+    box-shadow:0 8px 0 rgba(0,0,0,.12); border:4px solid #fff; background:#fff;
+  }
+  .clue-card h2{
+    font-family:var(--display); font-size:1.15rem; display:flex; align-items:center;
+    gap:8px; margin-bottom:8px; padding:6px 10px; border-radius:10px; color:#fff;
+  }
+  .clue-card.across h2{background:var(--across);}
+  .clue-card.down   h2{background:var(--down);}
+  .clue{
+    display:flex; gap:8px; padding:8px 8px; border-radius:10px; cursor:pointer;
+    font-size:.88rem; line-height:1.35; transition:background .15s; align-items:flex-start;
+  }
+  .clue:hover{background:#f2f5fd;}
+  .clue.active-a{background:var(--across-soft);}
+  .clue.active-d{background:var(--down-soft);}
+  .clue.done{opacity:.55;}
+  .clue.done .txt{text-decoration:line-through;}
+  .clue .cnum{
+    flex:none; width:26px; height:26px; border-radius:8px; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.8rem;
+  }
+  .across .cnum{background:var(--across);}
+  .down   .cnum{background:var(--down);}
+  .clue .len{color:#8b96b5; font-weight:700; white-space:nowrap;}
+  .clue .medal{margin-left:auto; flex:none;}
+  .dirtag{
+    font-weight:800; font-size:.72rem; padding:2px 8px; border-radius:999px; color:#fff;
+  }
+  .dirtag.a{background:var(--across);} .dirtag.d{background:var(--down);}
+
+  .howto{
+    background:rgba(255,255,255,.92); border-radius:var(--radius); padding:12px 14px;
+    font-size:.85rem; box-shadow:0 8px 0 rgba(0,0,0,.12); border:4px solid #fff;
+  }
+  .howto b{color:var(--across);}
+
+  footer{text-align:center; margin-top:22px; color:rgba(255,255,255,.9); font-weight:700; font-size:.85rem;}
+
+  /* ---------- win overlay ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(36,59,107,.55); z-index:50;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .win-card{
+    background:#fff; border-radius:24px; padding:34px 30px; text-align:center;
+    max-width:420px; border:6px solid var(--sun);
+    animation:winin .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes winin{from{transform:scale(.5); opacity:0;}}
+  .win-card .big{font-size:3.2rem;}
+  .win-card h2{font-family:var(--display); font-size:1.8rem; margin:6px 0 8px;}
+  .win-card p{font-size:.95rem; margin-bottom:16px;}
+  .win-card button{
+    background:var(--across); color:#fff; border:none; font-weight:800;
+    padding:12px 26px; border-radius:999px; font-size:1rem; cursor:pointer;
+    box-shadow:0 4px 0 rgba(0,0,0,.18);
+  }
+
+  .confetti{position:fixed; top:-20px; z-index:60; pointer-events:none;
+    width:12px; height:12px; border-radius:3px; animation:fall linear forwards;}
+  @keyframes fall{
+    to{transform:translateY(115vh) rotate(720deg);}
+  }
+
+  @media (max-width:560px){ :root{--cell:34px;} }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="float-letters" id="floaters"></div>
+
+<div class="wrap">
+  <header>
+    <span class="kicker">Game 3 · Grammar Booklet</span>
+    <h1>🧩 Grammar Crossword Challenge ✏️</h1>
+    <div class="subtitle">Grade 6 · Solve the clues and fill the grid with key grammar terms!</div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="stars" id="stars"></div>
+    <div class="count-pill">Words found: <b id="foundCount">0</b> / 10</div>
+  </div>
+
+  <div class="game">
+    <div class="board-card">
+      <div class="toolbar">
+        <button class="tool btn-check" id="btnCheck">✔ Check my answers</button>
+        <button class="tool btn-hint" id="btnHint">💡 Hint letter</button>
+        <button class="tool btn-erase" id="btnErase">🧹 Erase all</button>
+      </div>
+      <div class="selected-clue" id="selClue">👆 Tap any square or a clue to start!</div>
+      <div class="board-scroll"><div id="grid"></div></div>
+    </div>
+
+    <div class="clues">
+      <div class="howto">
+        <b>How to play:</b> tap a square, then type the answer — it moves to the next
+        square for you. Tap the same square again to switch between
+        <span class="dirtag a">ACROSS →</span> and <span class="dirtag d">DOWN ↓</span>.
+        Correct words turn green and earn a ⭐ all by themselves!
+      </div>
+      <div class="clue-card across">
+        <h2>➡️ Across</h2>
+        <div id="acrossList"></div>
+      </div>
+      <div class="clue-card down">
+        <h2>⬇️ Down</h2>
+        <div id="downList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Grade 6 English · Grammar Booklet · Game 3 🌟</footer>
+</div>
+
+<div class="overlay" id="winOverlay">
+  <div class="win-card">
+    <div class="big">🏆</div>
+    <h2>Grammar Champion!</h2>
+    <p id="winMsg">You found all 10 grammar words — amazing work!</p>
+    <button id="btnAgain">Play again 🔁</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- puzzle data ---------------- */
+  // breaks: letter index where the SECOND word of a two-word answer starts
+  var WORDS = [
+    {num:1,  dir:"A", answer:"ADJECTIVE",    row:1,  col:13, len:"(9)",
+     clue:"A word that describes or modifies a noun."},
+    {num:2,  dir:"D", answer:"FANBOYS",      row:0,  col:13, len:"(7)",
+     clue:"Words that link two independent clauses — For, And, Nor, But, Or, Yet, So (say it as one word!)."},
+    {num:3,  dir:"A", answer:"COMPOUND",     row:4,  col:9,  len:"(8)",
+     clue:"A sentence with two independent clauses joined by \u201Cand\u201D, \u201Cbut\u201D, or a semicolon."},
+    {num:4,  dir:"D", answer:"FRAGMENT",     row:0,  col:11, len:"(8)",
+     clue:"An incomplete sentence — missing a subject, a verb, or a complete thought."},
+    {num:5,  dir:"A", answer:"DIRECTOBJECT", row:7,  col:0,  len:"(6,6)", brk:6,
+     clue:"The noun or pronoun that receives the action of the verb. Ask \u201CWhat?\u201D or \u201CWhom?\u201D after the verb."},
+    {num:6,  dir:"D", answer:"APPOSITIVE",   row:1,  col:5,  len:"(10)",
+     clue:"A noun phrase that renames or gives more information about the noun right next to it."},
+    {num:7,  dir:"A", answer:"PROGRESSIVE",  row:10, col:0,  len:"(11)",
+     clue:"A verb form that shows ongoing action using \u201Cto be\u201D + -ing."},
+    {num:8,  dir:"D", answer:"LINKINGVERB",  row:9,  col:8,  len:"(7,4)", brk:7,
+     clue:"The type of verb that connects a subject to its complement — \u201Cis\u201D, \u201Cseems\u201D, \u201Cbecame\u201D."},
+    {num:9,  dir:"A", answer:"WHOM",         row:4,  col:3,  len:"(4)",
+     clue:"A relative pronoun used for people when they are the OBJECT of the clause."},
+    {num:10, dir:"D", answer:"VERBPHRASE",   row:9,  col:10, len:"(4,6)", brk:4,
+     clue:"One or more helping verbs + a main verb working together."}
+  ];
+  var ROWS = 20, COLS = 22;
+
+  /* ---------------- build cell map ---------------- */
+  var cells = {}; // "r,c" -> {r,c,letter,words:[{w,i}],num,el,input,locked}
+  WORDS.forEach(function(w, wi){
+    for (var i = 0; i < w.answer.length; i++){
+      var r = w.row + (w.dir === "D" ? i : 0);
+      var c = w.col + (w.dir === "A" ? i : 0);
+      var key = r + "," + c;
+      if (!cells[key]) cells[key] = {r:r, c:c, letter:w.answer[i], words:[], num:null, locked:false};
+      cells[key].words.push({w:wi, i:i});
+      if (i === 0) cells[key].num = w.num;
+    }
+  });
+
+  /* ---------------- render grid ---------------- */
+  var grid = document.getElementById("grid");
+  grid.style.gridTemplateColumns = "repeat(" + COLS + ", var(--cell))";
+  var frag = document.createDocumentFragment();
+  for (var r = 0; r < ROWS; r++){
+    for (var c = 0; c < COLS; c++){
+      var key = r + "," + c;
+      var div = document.createElement("div");
+      div.className = "cell";
+      if (!cells[key]){
+        div.classList.add("block");
+      } else {
+        var cell = cells[key];
+        cell.el = div;
+        cell.words.forEach(function(ref){
+          var w = WORDS[ref.w];
+          if (w.brk && ref.i === w.brk){
+            div.classList.add(w.dir === "A" ? "break-left" : "break-top");
+          }
+        });
+        if (cell.num !== null){
+          var n = document.createElement("span");
+          n.className = "num"; n.textContent = cell.num;
+          div.appendChild(n);
+        }
+        var inp = document.createElement("input");
+        inp.type = "text";
+        inp.maxLength = 2; /* allow overwrite-typing; we keep last char */
+        inp.autocomplete = "off"; inp.autocapitalize = "characters";
+        inp.spellcheck = false; inp.inputMode = "text";
+        inp.dataset.key = key;
+        cell.input = inp;
+        div.appendChild(inp);
+      }
+      frag.appendChild(div);
+    }
+  }
+  grid.appendChild(frag);
+
+  /* ---------------- clues ---------------- */
+  var aList = document.getElementById("acrossList");
+  var dList = document.getElementById("downList");
+  WORDS.forEach(function(w, wi){
+    var el = document.createElement("div");
+    el.className = "clue"; el.dataset.w = wi;
+    el.innerHTML = '<span class="cnum">' + w.num + '</span>' +
+      '<span class="txt">' + w.clue + ' <span class="len">' + w.len + '</span></span>' +
+      '<span class="medal"></span>';
+    el.addEventListener("click", function(){ selectWord(wi, true); });
+    (w.dir === "A" ? aList : dList).appendChild(el);
+    w.clueEl = el;
+  });
+
+  /* ---------------- stars ---------------- */
+  var starsBox = document.getElementById("stars");
+  WORDS.forEach(function(w){
+    var s = document.createElement("span");
+    s.className = "star"; s.textContent = "⭐"; s.title = "Word " + w.num;
+    starsBox.appendChild(s);
+    w.starEl = s;
+  });
+
+  /* ---------------- selection ---------------- */
+  var curW = null, curKey = null;
+  var selClue = document.getElementById("selClue");
+
+  function wordCells(wi){
+    var w = WORDS[wi], out = [];
+    for (var i = 0; i < w.answer.length; i++){
+      var r = w.row + (w.dir === "D" ? i : 0);
+      var c = w.col + (w.dir === "A" ? i : 0);
+      out.push(cells[r + "," + c]);
+    }
+    return out;
+  }
+  function clearHighlight(){
+    Object.keys(cells).forEach(function(k){
+      cells[k].el.classList.remove("hl-a", "hl-d");
+    });
+    WORDS.forEach(function(w){ w.clueEl.classList.remove("active-a", "active-d"); });
+  }
+  function selectWord(wi, focusFirstEmpty){
+    curW = wi;
+    var w = WORDS[wi];
+    clearHighlight();
+    var cls = w.dir === "A" ? "hl-a" : "hl-d";
+    wordCells(wi).forEach(function(cell){ cell.el.classList.add(cls); });
+    w.clueEl.classList.add(w.dir === "A" ? "active-a" : "active-d");
+    selClue.innerHTML = '<span class="dirtag ' + (w.dir === "A" ? "a" : "d") + '">' +
+      w.num + (w.dir === "A" ? " ACROSS →" : " DOWN ↓") + '</span><span>' +
+      w.clue + ' <b>' + w.len + '</b></span>';
+    if (focusFirstEmpty){
+      var target = null;
+      wordCells(wi).forEach(function(cell){
+        if (!target && !cell.locked && !cell.input.value) target = cell;
+      });
+      if (!target) target = wordCells(wi)[0];
+      curKey = target.r + "," + target.c;
+      target.input.focus();
+      target.el.scrollIntoView({block:"nearest", inline:"nearest"});
+    }
+  }
+  function pickWordFor(cell){
+    // keep current word if it contains this cell; on re-tap toggle to the other word
+    var refs = cell.words.map(function(ref){ return ref.w; });
+    var key = cell.r + "," + cell.c;
+    if (curW !== null && refs.indexOf(curW) !== -1){
+      if (key === curKey && refs.length > 1){
+        return refs[(refs.indexOf(curW) + 1) % refs.length]; // toggle
+      }
+      return curW;
+    }
+    // prefer across
+    var across = refs.filter(function(wi){ return WORDS[wi].dir === "A"; });
+    return across.length ? across[0] : refs[0];
+  }
+
+  /* ---------------- typing ---------------- */
+  var hintsUsed = 0;
+
+  function moveWithin(delta){
+    if (curW === null) return;
+    var list = wordCells(curW);
+    var idx = -1;
+    list.forEach(function(cell, i){ if (cell.r + "," + cell.c === curKey) idx = i; });
+    var next = idx + delta;
+    if (next >= 0 && next < list.length){
+      curKey = list[next].r + "," + list[next].c;
+      list[next].input.focus();
+    }
+  }
+  function moveSpatial(dr, dc){
+    if (!curKey) return;
+    var parts = curKey.split(","), r = +parts[0], c = +parts[1];
+    for (var step = 1; step < Math.max(ROWS, COLS); step++){
+      var k = (r + dr * step) + "," + (c + dc * step);
+      if (cells[k]){ cells[k].input.focus(); return; }
+    }
+  }
+  function setLetter(cell, ch){
+    if (cell.locked) { moveWithin(1); return; }
+    cell.input.value = ch;
+    cell.el.classList.remove("bad");
+    // auto-lock any word that is now complete & correct
+    cell.words.forEach(function(ref){ tryLock(ref.w); });
+    if (!cell.locked) moveWithin(1); else moveWithin(1);
+  }
+
+  grid.addEventListener("focusin", function(e){
+    var key = e.target.dataset && e.target.dataset.key;
+    if (!key) return;
+    var cell = cells[key];
+    var wi = pickWordFor(cell);
+    curKey = key;
+    if (wi !== curW || !cell.el.classList.contains(WORDS[wi].dir === "A" ? "hl-a" : "hl-d")){
+      selectWord(wi, false);
+    }
+  });
+  grid.addEventListener("mousedown", function(e){
+    var key = e.target.dataset && e.target.dataset.key;
+    if (!key) return;
+    if (key === curKey && document.activeElement === e.target){
+      // re-tap on focused cell toggles direction
+      var wi = pickWordFor(cells[key]);
+      if (wi !== curW) selectWord(wi, false);
+    }
+  });
+  grid.addEventListener("keydown", function(e){
+    var key = e.target.dataset && e.target.dataset.key;
+    if (!key) return;
+    var cell = cells[key];
+    if (e.key === "Backspace"){
+      e.preventDefault();
+      if (!cell.locked && cell.input.value){ cell.input.value = ""; cell.el.classList.remove("bad"); }
+      else moveWithin(-1);
+      return;
+    }
+    if (e.key === "ArrowRight"){ e.preventDefault(); moveSpatial(0, 1);  return; }
+    if (e.key === "ArrowLeft"){  e.preventDefault(); moveSpatial(0, -1); return; }
+    if (e.key === "ArrowDown"){  e.preventDefault(); moveSpatial(1, 0);  return; }
+    if (e.key === "ArrowUp"){    e.preventDefault(); moveSpatial(-1, 0); return; }
+    if (/^[a-zA-Z]$/.test(e.key)){
+      e.preventDefault();
+      setLetter(cell, e.key.toUpperCase());
+    }
+  });
+  // mobile keyboards often use input events instead of keydown
+  grid.addEventListener("input", function(e){
+    var key = e.target.dataset && e.target.dataset.key;
+    if (!key) return;
+    var cell = cells[key];
+    var v = e.target.value.replace(/[^a-zA-Z]/g, "");
+    if (!v){ e.target.value = cell.locked ? cell.letter : ""; return; }
+    var ch = v[v.length - 1].toUpperCase();
+    if (cell.locked){ e.target.value = cell.letter; return; }
+    e.target.value = ch;
+    cell.el.classList.remove("bad");
+    cell.words.forEach(function(ref){ tryLock(ref.w); });
+    moveWithin(1);
+  });
+
+  /* ---------------- locking & winning ---------------- */
+  function wordComplete(wi){
+    return wordCells(wi).every(function(cell){ return cell.input.value; });
+  }
+  function wordCorrect(wi){
+    return wordCells(wi).every(function(cell){ return cell.input.value === cell.letter; });
+  }
+  function tryLock(wi){
+    var w = WORDS[wi];
+    if (w.locked || !wordComplete(wi) || !wordCorrect(wi)) return;
+    w.locked = true;
+    wordCells(wi).forEach(function(cell, i){
+      cell.locked = true;
+      cell.input.readOnly = true;
+      setTimeout(function(){ cell.el.classList.add("locked"); cell.el.classList.remove("bad"); }, i * 55);
+    });
+    w.clueEl.classList.add("done");
+    w.clueEl.querySelector(".medal").textContent = "⭐";
+    w.starEl.classList.add("lit");
+    updateCount();
+    var found = WORDS.filter(function(x){ return x.locked; }).length;
+    if (found === WORDS.length){
+      setTimeout(win, 700);
+    } else {
+      miniConfetti(14);
+    }
+  }
+  function updateCount(){
+    document.getElementById("foundCount").textContent =
+      WORDS.filter(function(x){ return x.locked; }).length;
+  }
+  function win(){
+    document.getElementById("winMsg").textContent =
+      hintsUsed === 0
+        ? "All 10 grammar words — with no hints. Outstanding! 🌟"
+        : "You found all 10 grammar words! (Hints used: " + hintsUsed + ")";
+    document.getElementById("winOverlay").classList.add("show");
+    bigConfetti();
+  }
+
+  /* ---------------- toolbar ---------------- */
+  document.getElementById("btnCheck").addEventListener("click", function(){
+    var anyWrong = false;
+    WORDS.forEach(function(w, wi){ tryLock(wi); });
+    Object.keys(cells).forEach(function(k){
+      var cell = cells[k];
+      if (cell.locked || !cell.input.value) return;
+      if (cell.input.value !== cell.letter){
+        cell.el.classList.add("bad");
+        anyWrong = true;
+      }
+    });
+    if (!anyWrong) miniConfetti(10);
+  });
+  document.getElementById("btnHint").addEventListener("click", function(){
+    var cell = curKey ? cells[curKey] : null;
+    if (!cell || cell.locked){
+      // find first empty cell of current word, else any empty cell
+      var pool = curW !== null ? wordCells(curW) : Object.keys(cells).map(function(k){ return cells[k]; });
+      cell = null;
+      pool.forEach(function(c){ if (!cell && !c.locked && c.input.value !== c.letter) cell = c; });
+      if (!cell) return;
+    }
+    hintsUsed++;
+    cell.input.value = cell.letter;
+    cell.el.classList.remove("bad");
+    cell.words.forEach(function(ref){ tryLock(ref.w); });
+  });
+  document.getElementById("btnErase").addEventListener("click", function(){
+    if (!confirm("Erase all your letters and start again?")) return;
+    Object.keys(cells).forEach(function(k){
+      var cell = cells[k];
+      cell.locked = false; cell.input.readOnly = false;
+      cell.input.value = ""; cell.el.classList.remove("locked", "bad");
+    });
+    WORDS.forEach(function(w){
+      w.locked = false;
+      w.clueEl.classList.remove("done");
+      w.clueEl.querySelector(".medal").textContent = "";
+      w.starEl.classList.remove("lit");
+    });
+    hintsUsed = 0;
+    updateCount();
+  });
+  document.getElementById("btnAgain").addEventListener("click", function(){
+    document.getElementById("winOverlay").classList.remove("show");
+    document.getElementById("btnErase").click();
+  });
+
+  /* ---------------- confetti ---------------- */
+  var palette = ["#ff7a59", "#7c5cfc", "#ffce3d", "#2ecc8f", "#4cc3f7", "#ff5470"];
+  function dropConfetti(n, spread){
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for (var i = 0; i < n; i++){
+      var p = document.createElement("div");
+      p.className = "confetti";
+      p.style.left = (spread ? Math.random() * 100 : 40 + Math.random() * 20) + "vw";
+      p.style.background = palette[Math.floor(Math.random() * palette.length)];
+      p.style.animationDuration = (2.2 + Math.random() * 2) + "s";
+      p.style.animationDelay = (Math.random() * .4) + "s";
+      p.style.width = p.style.height = (8 + Math.random() * 8) + "px";
+      document.body.appendChild(p);
+      (function(el){ setTimeout(function(){ el.remove(); }, 5000); })(p);
+    }
+  }
+  function miniConfetti(n){ dropConfetti(n, false); }
+  function bigConfetti(){ dropConfetti(130, true); }
+
+  /* ---------------- floating letters bg ---------------- */
+  var floaters = document.getElementById("floaters");
+  var alpha = "GRAMMAR!?→↓✏";
+  for (var i = 0; i < 16; i++){
+    var s = document.createElement("span");
+    s.textContent = alpha[Math.floor(Math.random() * alpha.length)];
+    s.style.left = Math.random() * 96 + "vw";
+    s.style.fontSize = (24 + Math.random() * 44) + "px";
+    s.style.animationDuration = (12 + Math.random() * 14) + "s";
+    s.style.animationDelay = (-Math.random() * 16) + "s";
+    floaters.appendChild(s);
+  }
+
+  updateCount();
+})();
+</script>
+</body>
+</html>

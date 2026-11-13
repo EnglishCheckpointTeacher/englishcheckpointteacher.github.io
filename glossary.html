@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary of English terms · English Checkpoint</title>
+<meta name="description" content="A searchable glossary of the grammar, punctuation, literary and exam terms used in Cambridge Checkpoint English, each with a plain definition and an example.">
+<meta name="theme-color" content="#1e3a6d">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js"></script>
+</head>
+<body>
+<site-header current="glossary"></site-header>
+
+<main id="main">
+  <div class="page-hero" style="padding-bottom:48px">
+    <span class="big-num" aria-hidden="true">Aa</span>
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Glossary</span></nav>
+      <span class="eyebrow">Study tool</span>
+      <h1>Glossary of English terms</h1>
+      <p class="lead">Every grammar, punctuation, literary and exam term used on this site, with a plain definition and an example. Search for a word or choose a group.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:48px">
+    <div class="wrap">
+      <div class="gloss-tools">
+        <label class="search"><span class="sr">Search the glossary</span><svg class="ic"><use href="assets/icons.svg#search"/></svg><input id="q" type="search" placeholder="Search, for example “metaphor” or “clause”" autocomplete="off"></label>
+        <div class="filters" id="filters" role="group" aria-label="Filter by group"></div>
+      </div>
+      <p id="count" style="color:var(--ink-faint);font-size:.9rem" aria-live="polite"></p>
+      <div class="terms" id="terms"></div>
+      <p class="empty" id="empty" hidden>No terms match your search. Try a shorter word, or choose "All".</p>
+    </div>
+  </section>
+</main>
+
+<site-footer></site-footer>
+<script>
+// [term, group, definition, example]
+const TERMS = [
+  ["Noun", "Grammar", "A word that names a person, place, thing or idea.", "teacher, river, honesty"],
+  ["Proper noun", "Grammar", "The name of a particular person, place or thing. It starts with a capital letter.", "Amira, Cairo, Monday"],
+  ["Pronoun", "Grammar", "A word used in place of a noun.", "she, them, it, who"],
+  ["Verb", "Grammar", "A word that shows an action or a state.", "run, whispered, is, seems"],
+  ["Adjective", "Grammar", "A word that describes a noun.", "a narrow, winding road"],
+  ["Adverb", "Grammar", "A word that tells you how, when, where or how often something happens.", "She spoke quietly."],
+  ["Preposition", "Grammar", "A word that shows position, direction or time.", "under the bridge, after lunch"],
+  ["Conjunction", "Grammar", "A word that joins words, phrases or clauses.", "and, but, because, although"],
+  ["Determiner", "Grammar", "A word before a noun that shows which one or how many.", "the, a, this, some, every"],
+  ["Modal verb", "Grammar", "A verb that shows possibility, ability, advice or obligation.", "might, can, should, must"],
+  ["Clause", "Grammar", "A group of words with a subject and a verb.", "the rain stopped"],
+  ["Main clause", "Grammar", "A clause that makes sense on its own.", "We went home."],
+  ["Subordinate clause", "Grammar", "A clause that adds information but cannot stand alone.", "…because it was late."],
+  ["Relative clause", "Grammar", "A clause that gives more information about a noun, starting with who, which, that or whose.", "The girl who won is my cousin."],
+  ["Simple sentence", "Grammar", "A sentence with one main clause.", "The door opened."],
+  ["Compound sentence", "Grammar", "Two main clauses joined by and, but, or, so.", "I knocked, but nobody answered."],
+  ["Complex sentence", "Grammar", "A main clause with at least one subordinate clause.", "Although I knocked, nobody answered."],
+  ["Fronted adverbial", "Grammar", "A word or phrase at the start of a sentence that says when, where or how. Followed by a comma.", "Later that night, the wind dropped."],
+  ["Active voice", "Grammar", "The subject does the action.", "The cat chased the mouse."],
+  ["Passive voice", "Grammar", "The subject has the action done to it.", "The mouse was chased by the cat."],
+  ["Tense", "Grammar", "The form of a verb that shows when something happens: past, present or future.", "walked, walks, will walk"],
+  ["Imperative", "Grammar", "A verb used to give a command or instruction.", "Stir the mixture."],
+  ["Conditional", "Grammar", "A sentence with “if” that says what happens when something else happens.", "If it rains, we will stay in."],
+  ["Reported speech", "Grammar", "Telling what someone said without using their exact words.", "She said that she was tired."],
+  ["Comparative", "Grammar", "The form of an adjective used to compare two things.", "taller, more interesting"],
+  ["Superlative", "Grammar", "The form of an adjective used to compare three or more things.", "the tallest, the most interesting"],
+  ["Prefix", "Grammar", "Letters added to the start of a word to change its meaning.", "un + happy = unhappy"],
+  ["Suffix", "Grammar", "Letters added to the end of a word to change its meaning or word class.", "care + ful = careful"],
+  ["Synonym", "Grammar", "A word with the same or nearly the same meaning.", "huge and enormous"],
+  ["Antonym", "Grammar", "A word with the opposite meaning.", "ancient and modern"],
+  ["Collocation", "Grammar", "Words that are often used together.", "make a mistake, heavy rain"],
+
+  ["Full stop", "Punctuation", "Ends a statement.", "The match was over."],
+  ["Comma", "Punctuation", "Separates items in a list, and marks off clauses and fronted adverbials.", "After lunch, we packed maps, tents and food."],
+  ["Apostrophe", "Punctuation", "Shows a missing letter or shows possession.", "It's Maya's bag."],
+  ["Speech marks", "Punctuation", "Go around the exact words someone says.", "“Follow me,” she whispered."],
+  ["Colon", "Punctuation", "Introduces a list, an explanation or a reveal.", "There was one problem: the key."],
+  ["Semicolon", "Punctuation", "Joins two closely related sentences.", "The sea was calm; the sky was not."],
+  ["Dash", "Punctuation", "Adds extra information or a dramatic pause.", "He opened the box – and gasped."],
+  ["Brackets", "Punctuation", "Enclose extra information (parenthesis).", "The tower (built in 1890) is closed."],
+  ["Ellipsis", "Punctuation", "Three dots that show a pause, an unfinished thought or suspense.", "The handle began to turn…"],
+  ["Hyphen", "Punctuation", "Joins words or parts of words into one idea.", "a ten-year-old boy"],
+  ["Parenthesis", "Punctuation", "Extra information added to a sentence, marked by brackets, dashes or commas.", "My aunt, a doctor, lives abroad."],
+
+  ["Simile", "Literary devices", "A comparison using “like” or “as”.", "The fog hung like a wet blanket."],
+  ["Metaphor", "Literary devices", "Saying one thing is another to compare them.", "The classroom was a zoo."],
+  ["Personification", "Literary devices", "Giving human qualities to something that is not human.", "The wind whispered through the trees."],
+  ["Alliteration", "Literary devices", "Words close together that start with the same sound.", "the slow, silent sea"],
+  ["Sibilance", "Literary devices", "Repeated “s” or “sh” sounds.", "whispers slid through the grass"],
+  ["Onomatopoeia", "Literary devices", "A word that sounds like its meaning.", "crash, hiss, buzz"],
+  ["Hyperbole", "Literary devices", "Deliberate exaggeration for effect.", "I've told you a million times."],
+  ["Oxymoron", "Literary devices", "Two opposite words placed together.", "a deafening silence"],
+  ["Imagery", "Literary devices", "Language that creates a picture or appeals to the senses.", "golden light spilled across the cold stone floor"],
+  ["Pathetic fallacy", "Literary devices", "Weather or setting that reflects the mood.", "Thunder rolled as the argument began."],
+  ["Symbolism", "Literary devices", "Using an object to stand for an idea.", "a dove for peace"],
+  ["Foreshadowing", "Literary devices", "A hint about what will happen later.", "“It was the last time she would see the house.”"],
+  ["Connotation", "Literary devices", "The feelings or ideas a word suggests beyond its basic meaning.", "“Home” suggests warmth and safety."],
+  ["Tone", "Literary devices", "The attitude a writer shows through word choice.", "sarcastic, hopeful, critical"],
+  ["Mood", "Literary devices", "The feeling a text creates in the reader. Also called atmosphere.", "tense, peaceful, eerie"],
+  ["Rhetorical question", "Literary devices", "A question asked for effect, not for an answer.", "Is this the future we want?"],
+  ["Rule of three", "Literary devices", "Three linked words or ideas, used for emphasis.", "cheaper, cleaner, kinder"],
+  ["Emotive language", "Literary devices", "Words chosen to make the reader feel something strongly.", "helpless, abandoned puppies"],
+  ["Direct address", "Literary devices", "Speaking straight to the reader or audience as “you”.", "You can make a difference."],
+  ["Anecdote", "Literary devices", "A short personal story used to make a point.", "Last winter, my neighbour…"],
+
+  ["Fiction", "Texts and structure", "Writing about imagined people and events.", "novels, short stories, plays"],
+  ["Non-fiction", "Texts and structure", "Writing about real people, events and facts.", "reports, articles, biographies"],
+  ["Purpose", "Texts and structure", "Why a text was written.", "to inform, persuade, entertain, explain, advise"],
+  ["Audience", "Texts and structure", "Who a text is written for.", "young children, parents, experts"],
+  ["Register", "Texts and structure", "How formal or informal the language is.", "“Dear Ms Lee” or “Hi Sam”"],
+  ["Viewpoint", "Texts and structure", "The writer's opinion or attitude towards the subject.", "The writer is critical of fast fashion."],
+  ["Bias", "Texts and structure", "Showing only one side, or favouring one side unfairly.", "an advert that lists only the good points"],
+  ["Narrator", "Texts and structure", "The voice that tells a story.", "first person (I) or third person (he, she, they)"],
+  ["Theme", "Texts and structure", "A big idea that runs through a text.", "friendship, courage, loss"],
+  ["Setting", "Texts and structure", "Where and when a story takes place.", "a fishing village, long ago"],
+  ["Topic sentence", "Texts and structure", "The sentence that states the main point of a paragraph. Usually the first.", "“The second reason is cost.”"],
+  ["Flashback", "Texts and structure", "A scene that goes back to an earlier time.", "The story opens at the end, then returns to the start."],
+  ["Cliffhanger", "Texts and structure", "An ending that stops at a moment of suspense.", "The phone rang. It was her own number."],
+  ["Counter-argument", "Texts and structure", "The opposite view, raised so that you can answer it.", "Some say it costs too much. However…"],
+  ["Paraphrase", "Texts and structure", "The same idea expressed in different words.", "“cheap” → “doesn't cost much”"],
+
+  ["Explicit", "Exam words", "Stated clearly in the text.", "“The shop opens at nine.”"],
+  ["Implicit", "Exam words", "Suggested but not stated. You have to work it out.", "“She slammed the door.” (She is angry.)"],
+  ["Infer", "Exam words", "To work out something that is not directly stated, using clues.", "Wet umbrellas by the door tell you it is raining."],
+  ["Evidence", "Exam words", "A word, phrase or detail from the text that supports your answer.", "This is shown by the word “trembling”."],
+  ["Quotation", "Exam words", "Words copied exactly from the text, inside quotation marks.", "The writer calls the city “a furnace”."],
+  ["Explain", "Exam words", "Say why or how, and give a reason.", "…because it suggests…"],
+  ["Summarise", "Exam words", "Give only the main points, briefly and in your own words.", "A 50-word summary of a 300-word text"],
+  ["Compare", "Exam words", "Say what is similar and what is different.", "Both writers… whereas…"],
+  ["Effect", "Exam words", "What a word or technique makes the reader think, feel or imagine.", "It makes the reader feel uneasy."],
+  ["In your own words", "Exam words", "Do not copy from the text. Use different words with the same meaning.", "“exhausted” → “very tired”"],
+  ["Distractor", "Exam words", "A wrong option that looks or sounds right, often because it uses words from the text.", "Three times are mentioned. Only one is the meeting time."]
+];
+
+(function () {
+  const groups = ["All", ...new Set(TERMS.map(t => t[1]))];
+  const list = document.getElementById("terms"), filters = document.getElementById("filters");
+  const input = document.getElementById("q"), count = document.getElementById("count"), empty = document.getElementById("empty");
+  let group = "All";
+  const sorted = TERMS.slice().sort((a, b) => a[0].localeCompare(b[0]));
+
+  groups.forEach(g => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = g; b.setAttribute("aria-pressed", g === group);
+    b.onclick = () => { group = g; [...filters.children].forEach(x => x.setAttribute("aria-pressed", x === b)); render(); };
+    filters.appendChild(b);
+  });
+
+  function render() {
+    const q = input.value.trim().toLowerCase();
+    const shown = sorted.filter(t => (group === "All" || t[1] === group) && (!q || (t[0] + " " + t[2] + " " + t[3]).toLowerCase().includes(q)));
+    list.textContent = "";
+    shown.forEach(([term, cat, def, eg]) => {
+      const card = document.createElement("article");
+      card.className = "term";
+      const c = document.createElement("span"); c.className = "cat"; c.textContent = cat;
+      const h = document.createElement("h3"); h.textContent = term;
+      const p = document.createElement("p"); p.textContent = def;
+      const e = document.createElement("p"); e.className = "eg"; e.textContent = eg;
+      card.append(c, h, p, e);
+      list.appendChild(card);
+    });
+    empty.hidden = shown.length > 0;
+    count.textContent = shown.length + (shown.length === 1 ? " term" : " terms");
+  }
+  input.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>

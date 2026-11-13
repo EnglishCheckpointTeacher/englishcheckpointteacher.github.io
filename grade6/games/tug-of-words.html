@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tug of Words — Parts of Speech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rose:#FF4FA3; --rose-soft:#FFD3E7;
+    --lav:#8B5CF6;  --lav-soft:#E2D6FF;
+    --mint:#2FD3A6; --sun:#FFC93C;
+    --ink:#3E2148;  --ink-soft:#7A5C88;
+    --shadow:0 10px 0 rgba(62,33,72,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 15% 0%, #FFE6F2 0%, transparent 60%),
+      radial-gradient(1000px 600px at 85% 0%, #EDE4FF 0%, transparent 60%),
+      linear-gradient(180deg,#FFF4F9 0%,#F6F0FF 100%);
+    min-height:100%;overflow-x:hidden;
+  }
+  h1,h2{font-family:'Fredoka',sans-serif;font-weight:600;margin:0}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px 4px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand h1{font-size:clamp(19px,2.6vw,28px);letter-spacing:.5px}
+  .brand h1 .a{color:var(--rose)} .brand h1 .b{color:var(--lav)}
+  .brand small{display:block;font-weight:800;color:var(--ink-soft);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .tools{display:flex;gap:8px}
+  .chip{border:0;cursor:pointer;font-family:'Fredoka';font-size:15px;background:#fff;color:var(--ink);
+    padding:9px 16px;border-radius:999px;box-shadow:0 4px 0 rgba(62,33,72,.14);transition:transform .15s,box-shadow .15s}
+  .chip:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(62,33,72,.14)}
+
+  .stage{display:grid;grid-template-columns:1fr minmax(340px,35%) 1fr;gap:14px;padding:10px 16px 24px;align-items:stretch}
+
+  /* ---------------- centre arena ---------------- */
+  .center{display:flex;flex-direction:column;gap:10px}
+  .scorestrip{display:flex;flex-direction:column;gap:7px;background:#fff;border-radius:20px;padding:10px 14px;box-shadow:var(--shadow)}
+  .srow{display:flex;align-items:center;gap:9px;font-family:'Fredoka';font-size:16px}
+  .srow .dot{width:13px;height:13px;border-radius:50%;flex:0 0 auto}
+  .srow.a .dot{background:var(--rose)} .srow.b .dot{background:var(--lav)}
+  .srow .who{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pips{display:flex;gap:4px}
+  .pip{width:11px;height:11px;border-radius:50%;background:#EADFF2;transition:transform .3s,background .3s}
+  .srow.a .pip.on{background:var(--rose)} .srow.b .pip.on{background:var(--lav)}
+  .pip.just{transform:scale(1.55)}
+
+  .arena{position:relative;flex:1;min-height:clamp(290px,44vh,430px);border-radius:26px;overflow:hidden;
+    background:linear-gradient(180deg,#EAF6FF 0%,#FDF0F6 55%,#FFE9D6 100%);
+    box-shadow:inset 0 0 0 3px #fff, 0 12px 26px rgba(120,60,140,.12)}
+  .arena.shakeit{animation:arenaShake .45s ease}
+  @keyframes arenaShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}55%{transform:translateX(5px)}80%{transform:translateX(-2px)}}
+
+  .cloud{position:absolute;background:#fff;border-radius:999px;opacity:.85}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:999px}
+  .c1{width:70px;height:22px;top:11%;left:7%;animation:drift 26s linear infinite}
+  .c1::before{width:38px;height:38px;top:-17px;left:12px}
+  .c2{width:88px;height:24px;top:5%;left:58%;animation:drift 34s linear infinite reverse}
+  .c2::before{width:42px;height:42px;top:-21px;left:18px}
+  .c2::after{width:28px;height:28px;top:-13px;left:56px}
+  @keyframes drift{from{transform:translateX(-22px)}to{transform:translateX(30px)}}
+
+  .ground{position:absolute;left:0;right:0;bottom:0;height:24%;
+    background:linear-gradient(180deg,#FFD9A8,#FFC98A);border-top:4px solid #FFB870}
+  .ground::after{content:"";position:absolute;inset:auto 0 30% 0;height:3px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 14px,transparent 14px 30px)}
+  .mid-flag{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);width:6px;height:44%;
+    background:repeating-linear-gradient(180deg,var(--ink) 0 10px,#fff 10px 20px);border-radius:4px;opacity:.45}
+  .zone{position:absolute;bottom:24%;height:44%;width:20%;opacity:.26;border-radius:16px;transition:opacity .3s}
+  .zone.l{left:3%;background:linear-gradient(90deg,var(--rose),transparent)}
+  .zone.r{right:3%;background:linear-gradient(-90deg,var(--lav),transparent)}
+  .zone.hot{animation:hotzone 1s ease-in-out infinite}
+  @keyframes hotzone{0%,100%{opacity:.26}50%{opacity:.72}}
+
+  /* assembly = position along the field ; rig = the yank motion */
+  .assembly{position:absolute;left:50%;bottom:24%;width:min(94%,560px);height:0;
+    transform:translateX(-50%);transition:transform .6s cubic-bezier(.28,1.5,.5,1)}
+  .rig{position:absolute;inset:0}
+  .rig.yankL{animation:yankL .5s ease-out}
+  .rig.yankR{animation:yankR .5s ease-out}
+  @keyframes yankL{0%{transform:translateX(0)}35%{transform:translateX(-16px)}70%{transform:translateX(5px)}100%{transform:translateX(0)}}
+  @keyframes yankR{0%{transform:translateX(0)}35%{transform:translateX(16px)}70%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+
+  .rope{position:absolute;left:6%;right:6%;bottom:50px;height:11px;border-radius:8px;
+    background:repeating-linear-gradient(115deg,#E2A15A 0 9px,#C98440 9px 18px);
+    box-shadow:0 3px 0 rgba(120,70,20,.25)}
+  .rope.taut{animation:taut .45s ease}
+  @keyframes taut{0%,100%{transform:scaleY(1)}30%{transform:scaleY(1.5)}60%{transform:scaleY(.8)}}
+  .knot{position:absolute;left:50%;bottom:42px;transform:translateX(-50%);font-size:28px;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.15));animation:sway 2.8s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:translateX(-50%) rotate(-8deg)}50%{transform:translateX(-50%) rotate(8deg)}}
+  .knot.whip{animation:whip .5s ease}
+  @keyframes whip{0%{transform:translateX(-50%) rotate(0)}30%{transform:translateX(-50%) rotate(-38deg) scale(1.2)}100%{transform:translateX(-50%) rotate(0)}}
+
+  /* ---- the two girls: LEFT faces right, RIGHT faces left ---- */
+  .puller{position:absolute;bottom:0;width:120px;height:136px;transform-origin:bottom center}
+  .puller.left{left:0;animation:holdL 3.2s ease-in-out infinite}
+  .puller.right{right:0;animation:holdR 3.2s ease-in-out infinite}
+  @keyframes holdL{0%,100%{transform:scaleX(-1) rotate(7deg)}50%{transform:scaleX(-1) rotate(11deg)}}
+  @keyframes holdR{0%,100%{transform:rotate(7deg)}50%{transform:rotate(11deg)}}
+
+  .puller.dig,.puller.drag,.puller.cheer,.puller.slump{animation:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .puller.left.dig{transform:scaleX(-1) rotate(20deg)}
+  .puller.right.dig{transform:rotate(20deg)}
+  .puller.left.drag{transform:scaleX(-1) rotate(-9deg)}
+  .puller.right.drag{transform:rotate(-9deg)}
+  .puller.left.cheer{animation:cheerL .7s ease-in-out infinite}
+  .puller.right.cheer{animation:cheerR .7s ease-in-out infinite}
+  @keyframes cheerL{0%,100%{transform:scaleX(-1) rotate(0) translateY(0)}50%{transform:scaleX(-1) rotate(8deg) translateY(-22px)}}
+  @keyframes cheerR{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(-8deg) translateY(-22px)}}
+  .puller.left.slump{transform:scaleX(-1) rotate(-16deg)}
+  .puller.right.slump{transform:rotate(-16deg)}
+
+  .dust{position:absolute;bottom:2px;width:16px;height:16px;border-radius:50%;background:#E8B77A;opacity:0;pointer-events:none}
+  .dust.go{animation:puff .6s ease-out}
+  @keyframes puff{0%{opacity:.9;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(var(--dx),-26px) scale(1.9)}}
+
+  .shout{position:absolute;bottom:118px;font-family:'Fredoka';font-size:21px;font-weight:600;
+    padding:5px 13px;border-radius:999px;color:#fff;opacity:0;pointer-events:none;white-space:nowrap}
+  .shout.l{left:4px;background:var(--rose)}
+  .shout.r{right:4px;background:var(--lav)}
+  .shout.go{animation:shoutPop .9s ease-out}
+  @keyframes shoutPop{0%{opacity:0;transform:translateY(10px) scale(.6)}25%{opacity:1;transform:translateY(-4px) scale(1.1)}70%{opacity:1;transform:translateY(-10px) scale(1)}100%{opacity:0;transform:translateY(-26px) scale(.95)}}
+
+  /* ---------------- play panels ---------------- */
+  .panel{background:#fff;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:11px;
+    box-shadow:0 8px 0 rgba(62,33,72,.09),0 18px 30px rgba(120,60,140,.10);border:3px solid transparent;transition:box-shadow .25s}
+  .panel.a{border-color:var(--rose-soft);background:linear-gradient(180deg,#FFF9FC,#fff)}
+  .panel.b{border-color:var(--lav-soft);background:linear-gradient(180deg,#FBF8FF,#fff)}
+  .panel.flash{animation:panelFlash .6s ease}
+  @keyframes panelFlash{0%{box-shadow:0 8px 0 rgba(62,33,72,.09),0 0 0 0 rgba(47,211,166,.55)}100%{box-shadow:0 8px 0 rgba(62,33,72,.09),0 0 0 22px rgba(47,211,166,0)}}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .team-name{font-family:'Fredoka';font-size:19px}
+  .panel.a .team-name{color:var(--rose)} .panel.b .team-name{color:var(--lav)}
+  .streak{font-size:13px;font-weight:800;color:var(--ink-soft);background:#F6EFFA;padding:4px 10px;border-radius:999px}
+  .qtag{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft)}
+  .question{font-size:clamp(17px,1.9vw,22px);font-weight:700;line-height:1.55;min-height:74px}
+  .question .mark{background:linear-gradient(180deg,transparent 62%,var(--sun) 62%);padding:0 3px;font-weight:800;border-bottom:3px solid var(--ink)}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opt{font-family:'Fredoka';font-size:clamp(15px,1.6vw,18px);cursor:pointer;border:0;padding:14px 8px;
+    border-radius:16px;color:var(--ink);background:#F4ECFA;box-shadow:0 5px 0 #E0D2EC;transition:transform .12s,box-shadow .12s,background .2s}
+  .panel.a .opt{background:#FFECF5;box-shadow:0 5px 0 #F6D3E4}
+  .opt:hover{transform:translateY(-2px)}
+  .opt:active{transform:translateY(3px);box-shadow:0 1px 0 #E0D2EC}
+  .opt:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+  .opt.right{background:#D9F8EC;box-shadow:0 5px 0 #A7E9CF;color:#15795A}
+  .opt.wrong{background:#FFE0E0;box-shadow:0 5px 0 #F6BDBD;color:#B03636;animation:nudge .35s}
+  @keyframes nudge{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}70%{transform:translateX(6px)}}
+  .feedback{min-height:22px;font-weight:800;font-size:14px}
+  .feedback.ok{color:#15795A} .feedback.no{color:#B03636}
+  .keys{font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.5px}
+
+  /* ---------------- overlays ---------------- */
+  .overlay{position:fixed;inset:0;background:rgba(62,33,72,.55);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:20px;z-index:40;overflow:auto}
+  .overlay.hide{display:none}
+  .card{background:#fff;border-radius:30px;padding:26px;max-width:560px;width:100%;text-align:center;
+    box-shadow:0 20px 50px rgba(62,33,72,.35)}
+  .card h2{font-size:clamp(25px,3.6vw,36px)}
+  .card h2 .a{color:var(--rose)} .card h2 .b{color:var(--lav)}
+  .card p{color:var(--ink-soft);font-weight:700;margin:8px 0 18px}
+  .name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .field{text-align:left}
+  .field label{display:block;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
+  .field input{width:100%;font-family:'Fredoka';font-size:17px;padding:11px 13px;border-radius:14px;
+    border:2px solid #EFE3F6;background:#FCF8FF;color:var(--ink)}
+  .field input:focus{outline:none;border-color:var(--lav)}
+  .targets{display:flex;gap:10px;justify-content:center;margin:6px 0 18px;flex-wrap:wrap}
+  .target{font-family:'Fredoka';font-size:16px;cursor:pointer;border:2px solid #EFE3F6;background:#fff;
+    padding:10px 18px;border-radius:999px;color:var(--ink-soft)}
+  .target.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .big{font-family:'Fredoka';font-size:22px;cursor:pointer;border:0;color:#fff;
+    background:linear-gradient(180deg,var(--rose),#E8348C);padding:15px 44px;border-radius:999px;
+    box-shadow:0 7px 0 #C42975;transition:transform .12s,box-shadow .12s}
+  .big:active{transform:translateY(4px);box-shadow:0 3px 0 #C42975}
+  .rules{font-size:13px;color:var(--ink-soft);font-weight:700;line-height:1.7;margin-top:16px;text-align:left}
+  .trophy{font-size:60px;animation:pop .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes pop{from{transform:scale(0) rotate(-30deg)}to{transform:scale(1) rotate(0)}}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  .conf{position:absolute;width:11px;height:16px;border-radius:3px;animation:fall linear forwards}
+  @keyframes fall{from{transform:translateY(-12vh) rotate(0)}to{transform:translateY(110vh) rotate(760deg)}}
+
+  @media (max-width:1000px){
+    .stage{grid-template-columns:1fr}
+    .arena{min-height:240px}
+    .puller{width:104px;height:118px}
+    .rope{bottom:44px} .knot{bottom:36px} .shout{bottom:102px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span style="font-size:28px">🪢</span>
+    <div>
+      <h1><span class="a">Tug</span> of <span class="b">Words</span></h1>
+      <small>Parts of Speech</small>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="chip" id="soundBtn">🔊 Sound on</button>
+    <button class="chip" id="againBtn">↺ New match</button>
+  </div>
+</div>
+
+<main class="stage">
+
+  <section class="panel a" id="panelA">
+    <div class="panel-head">
+      <span class="team-name" id="titleA">Team Rose</span>
+      <span class="streak" id="streakA">Streak 0</span>
+    </div>
+    <span class="qtag" id="tagA">Question</span>
+    <div class="question" id="qA"></div>
+    <div class="opts" id="oA"></div>
+    <div class="feedback" id="fA"></div>
+    <div class="keys">Keys: Q W E R</div>
+  </section>
+
+  <div class="center">
+    <div class="scorestrip">
+      <div class="srow a"><span class="dot"></span><span class="who" id="nameA">Team Rose</span><span class="pips" id="pipsA"></span></div>
+      <div class="srow b"><span class="dot"></span><span class="who" id="nameB">Team Lavender</span><span class="pips" id="pipsB"></span></div>
+    </div>
+
+    <div class="arena" id="arena">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="zone l" id="zoneL"></div>
+      <div class="zone r" id="zoneR"></div>
+      <div class="mid-flag"></div>
+      <div class="ground"></div>
+
+      <div class="assembly" id="assembly">
+        <div class="rig" id="rig">
+          <div class="rope" id="rope"></div>
+          <div class="knot" id="knot">🎀</div>
+
+          <div class="shout l" id="shoutA">Heave!</div>
+          <div class="shout r" id="shoutB">Heave!</div>
+
+          <div class="dust" id="dustA" style="left:26px;--dx:-22px"></div>
+          <div class="dust" id="dustB" style="right:26px;--dx:22px"></div>
+
+          <div class="puller left" id="pullerA">
+            <svg viewBox="0 0 150 170" width="100%" height="100%">
+              <path d="M96 44 q26 4 24 34 q-2 26 -20 30 q10 -30 -8 -50z" fill="#5B2E1E"/>
+              <path d="M74 118 L52 168" stroke="#3E2148" stroke-width="13" stroke-linecap="round"/>
+              <path d="M84 118 L104 166" stroke="#3E2148" stroke-width="13" stroke-linecap="round"/>
+              <ellipse cx="48" cy="168" rx="14" ry="7" fill="#FF4FA3"/>
+              <ellipse cx="108" cy="166" rx="14" ry="7" fill="#FF4FA3"/>
+              <path d="M78 62 q26 4 30 34 q4 26 -8 30 l-46 0 q-10 -32 6 -52z" fill="#FF4FA3"/>
+              <path d="M56 122 q26 8 52 0 q-4 10 -6 12 l-40 0z" fill="#FFC93C"/>
+              <path d="M74 76 L22 96" stroke="#F6C9A8" stroke-width="12" stroke-linecap="round"/>
+              <path d="M80 88 L22 102" stroke="#F6C9A8" stroke-width="12" stroke-linecap="round"/>
+              <circle cx="20" cy="96" r="8" fill="#F6C9A8"/>
+              <circle cx="20" cy="102" r="8" fill="#F6C9A8"/>
+              <circle cx="94" cy="46" r="26" fill="#F6C9A8"/>
+              <path d="M68 42 q4 -30 30 -28 q28 2 26 30 q-14 -16 -30 -12 q-16 4 -26 10z" fill="#5B2E1E"/>
+              <circle cx="86" cy="48" r="3.4" fill="#3E2148"/>
+              <circle cx="102" cy="48" r="3.4" fill="#3E2148"/>
+              <path d="M87 58 q7 7 14 0" stroke="#3E2148" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="79" cy="56" r="4.5" fill="#FF9EC5" opacity=".8"/>
+              <circle cx="109" cy="56" r="4.5" fill="#FF9EC5" opacity=".8"/>
+              <path d="M108 22 l12 -8 l0 16z" fill="#FFC93C"/>
+            </svg>
+          </div>
+
+          <div class="puller right" id="pullerB">
+            <svg viewBox="0 0 150 170" width="100%" height="100%">
+              <path d="M96 44 q26 4 24 34 q-2 26 -20 30 q10 -30 -8 -50z" fill="#241A3C"/>
+              <path d="M74 118 L52 168" stroke="#3E2148" stroke-width="13" stroke-linecap="round"/>
+              <path d="M84 118 L104 166" stroke="#3E2148" stroke-width="13" stroke-linecap="round"/>
+              <ellipse cx="48" cy="168" rx="14" ry="7" fill="#8B5CF6"/>
+              <ellipse cx="108" cy="166" rx="14" ry="7" fill="#8B5CF6"/>
+              <path d="M78 62 q26 4 30 34 q4 26 -8 30 l-46 0 q-10 -32 6 -52z" fill="#8B5CF6"/>
+              <path d="M56 122 q26 8 52 0 q-4 10 -6 12 l-40 0z" fill="#2FD3A6"/>
+              <path d="M74 76 L22 96" stroke="#E8B48F" stroke-width="12" stroke-linecap="round"/>
+              <path d="M80 88 L22 102" stroke="#E8B48F" stroke-width="12" stroke-linecap="round"/>
+              <circle cx="20" cy="96" r="8" fill="#E8B48F"/>
+              <circle cx="20" cy="102" r="8" fill="#E8B48F"/>
+              <circle cx="94" cy="46" r="26" fill="#E8B48F"/>
+              <path d="M68 42 q4 -30 30 -28 q28 2 26 30 q-14 -16 -30 -12 q-16 4 -26 10z" fill="#241A3C"/>
+              <circle cx="86" cy="48" r="3.4" fill="#3E2148"/>
+              <circle cx="102" cy="48" r="3.4" fill="#3E2148"/>
+              <path d="M87 58 q7 7 14 0" stroke="#3E2148" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="79" cy="56" r="4.5" fill="#FF9EC5" opacity=".8"/>
+              <circle cx="109" cy="56" r="4.5" fill="#FF9EC5" opacity=".8"/>
+              <path d="M108 22 l12 -8 l0 16z" fill="#2FD3A6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="panel b" id="panelB">
+    <div class="panel-head">
+      <span class="team-name" id="titleB">Team Lavender</span>
+      <span class="streak" id="streakB">Streak 0</span>
+    </div>
+    <span class="qtag" id="tagB">Question</span>
+    <div class="question" id="qB"></div>
+    <div class="opts" id="oB"></div>
+    <div class="feedback" id="fB"></div>
+    <div class="keys">Keys: U I O P</div>
+  </section>
+
+</main>
+
+<div class="overlay" id="startOverlay">
+  <div class="card">
+    <div style="font-size:48px">🪢🎀</div>
+    <h2><span class="a">Tug</span> of <span class="b">Words</span></h2>
+    <p>Two players pull at the same time. The rope sits between them.</p>
+    <div class="name-row">
+      <div class="field"><label>Left player</label><input id="inA" value="Team Rose" maxlength="16"></div>
+      <div class="field"><label>Right player</label><input id="inB" value="Team Lavender" maxlength="16"></div>
+    </div>
+    <div class="field" style="text-align:center"><label style="text-align:center">Pulls needed to win</label></div>
+    <div class="targets" id="targets">
+      <button class="target" data-t="4">4 — quick</button>
+      <button class="target on" data-t="6">6 — normal</button>
+      <button class="target" data-t="8">8 — long</button>
+    </div>
+    <button class="big" id="startBtn">Start the match</button>
+    <div class="rules">
+      • Both girls play together — each answers her own questions on her own side, with no timer and no turns.<br>
+      • Correct answer → your girl digs her heels in, the rope snaps to your side and the other girl is dragged forward.<br>
+      • Wrong answer → the rope holds and the correct answer is shown.<br>
+      • Questions run easy to hard across all nine word classes: noun, pronoun, verb, adjective, adverb, preposition, conjunction, interjection, article.
+    </div>
+  </div>
+</div>
+
+<div class="overlay hide" id="winOverlay">
+  <div class="card">
+    <div class="trophy">🏆</div>
+    <h2 id="winTitle">Team Rose wins!</h2>
+    <p id="winSub"></p>
+    <button class="big" id="rematchBtn">Play again</button>
+  </div>
+</div>
+
+<div class="confetti" id="confetti"></div>
+
+<script>
+const CLASSES = ["Noun","Pronoun","Verb","Adjective","Adverb","Preposition","Conjunction","Interjection","Article"];
+
+const BANK = [
+{t:"s",lvl:1,s:"The *garden* is full of roses.",a:"Noun"},
+{t:"s",lvl:1,s:"Sara borrowed my *pencil*.",a:"Noun"},
+{t:"s",lvl:1,s:"*Jeddah* sits beside the Red Sea.",a:"Noun"},
+{t:"s",lvl:2,s:"The *team* won the championship.",a:"Noun"},
+{t:"s",lvl:3,s:"Her *kindness* surprised everyone.",a:"Noun"},
+{t:"s",lvl:3,s:"*Honesty* matters more than winning.",a:"Noun"},
+{t:"s",lvl:1,s:"*She* painted the wall blue.",a:"Pronoun"},
+{t:"s",lvl:1,s:"We invited *them* to the picnic.",a:"Pronoun"},
+{t:"s",lvl:2,s:"That green notebook is *mine*.",a:"Pronoun"},
+{t:"s",lvl:2,s:"Layla hurt *herself* on the swing.",a:"Pronoun"},
+{t:"s",lvl:3,s:"*Everyone* enjoyed the school trip.",a:"Pronoun"},
+{t:"s",lvl:3,s:"*Which* of these bags is yours?",a:"Pronoun"},
+{t:"s",lvl:1,s:"The girls *danced* at the party.",a:"Verb"},
+{t:"s",lvl:1,s:"Mona *reads* every evening.",a:"Verb"},
+{t:"s",lvl:2,s:"Noor *is* my best friend.",a:"Verb"},
+{t:"s",lvl:2,s:"They have *finished* the project.",a:"Verb"},
+{t:"s",lvl:3,s:"She *seems* happy today.",a:"Verb"},
+{t:"s",lvl:3,s:"We *should* leave early tomorrow.",a:"Verb"},
+{t:"s",lvl:1,s:"She wore a *purple* dress.",a:"Adjective"},
+{t:"s",lvl:1,s:"We climbed the *tall* hill.",a:"Adjective"},
+{t:"s",lvl:2,s:"The soup tastes *delicious*.",a:"Adjective"},
+{t:"s",lvl:2,s:"He is *taller* than his sister.",a:"Adjective"},
+{t:"s",lvl:2,s:"That was a *brilliant* idea.",a:"Adjective"},
+{t:"s",lvl:3,s:"It was an *unforgettable* evening.",a:"Adjective"},
+{t:"s",lvl:1,s:"She sang *beautifully*.",a:"Adverb"},
+{t:"s",lvl:1,s:"The children ran *quickly*.",a:"Adverb"},
+{t:"s",lvl:2,s:"*Suddenly*, the lights went out.",a:"Adverb"},
+{t:"s",lvl:2,s:"He *rarely* speaks in class.",a:"Adverb"},
+{t:"s",lvl:3,s:"The baby is *very* sleepy.",a:"Adverb"},
+{t:"s",lvl:3,s:"We arrived *early* for the exam.",a:"Adverb"},
+{t:"s",lvl:1,s:"The cat hid *under* the table.",a:"Preposition"},
+{t:"s",lvl:1,s:"We walked *through* the park.",a:"Preposition"},
+{t:"s",lvl:2,s:"Put the vase *between* the windows.",a:"Preposition"},
+{t:"s",lvl:2,s:"She is good *at* mathematics.",a:"Preposition"},
+{t:"s",lvl:3,s:"The meeting is *before* lunch.",a:"Preposition"},
+{t:"s",lvl:3,s:"The lamp fell *onto* the carpet.",a:"Preposition"},
+{t:"s",lvl:1,s:"Choose the red *or* the blue ribbon.",a:"Conjunction"},
+{t:"s",lvl:1,s:"Both Hana *and* Mona joined the club.",a:"Conjunction"},
+{t:"s",lvl:2,s:"I wanted tea *but* there was none.",a:"Conjunction"},
+{t:"s",lvl:2,s:"We stayed inside *because* it rained.",a:"Conjunction"},
+{t:"s",lvl:3,s:"*Although* she was tired, she kept reading.",a:"Conjunction"},
+{t:"s",lvl:3,s:"Wait here *until* the bell rings.",a:"Conjunction"},
+{t:"s",lvl:1,s:"*Wow*! What a beautiful painting.",a:"Interjection"},
+{t:"s",lvl:1,s:"*Oops*, I dropped my phone.",a:"Interjection"},
+{t:"s",lvl:2,s:"*Hurray*! Our team won the match.",a:"Interjection"},
+{t:"s",lvl:2,s:"*Ouch*! That really hurt.",a:"Interjection"},
+{t:"s",lvl:3,s:"*Well*, I suppose we can try again.",a:"Interjection"},
+{t:"s",lvl:1,s:"*The* moon looked huge tonight.",a:"Article"},
+{t:"s",lvl:1,s:"She adopted *a* kitten.",a:"Article"},
+{t:"s",lvl:2,s:"He waited for *an* hour.",a:"Article"},
+{t:"w",lvl:1,q:"Which word is a proper noun?",o:["river","Cairo","city","teacher"],a:"Cairo"},
+{t:"w",lvl:1,q:"Which word is a pronoun?",o:["Sara","they","book","blue"],a:"they"},
+{t:"w",lvl:1,q:"Which word is a verb?",o:["beautiful","jump","slowly","under"],a:"jump"},
+{t:"w",lvl:1,q:"Which word is an adjective?",o:["gently","brave","table","into"],a:"brave"},
+{t:"w",lvl:1,q:"Which word is a preposition?",o:["because","beside","but","wow"],a:"beside"},
+{t:"w",lvl:1,q:"Which word is an interjection?",o:["ouch","out","our","over"],a:"ouch"},
+{t:"w",lvl:1,q:"Which word is an adjective?",o:["happiness","happily","happy","happen"],a:"happy"},
+{t:"w",lvl:2,q:"Which word is an adverb?",o:["quiet","quietly","quietness","quieten"],a:"quietly"},
+{t:"w",lvl:2,q:"Which word is an article?",o:["this","an","my","some"],a:"an"},
+{t:"w",lvl:2,q:"Which word is an abstract noun?",o:["chair","courage","cousin","cloud"],a:"courage"},
+{t:"w",lvl:2,q:"Which word is a plural noun?",o:["child","children","childish","childhood"],a:"children"},
+{t:"w",lvl:2,q:"Which word is a comparative adjective?",o:["best","better","well","good"],a:"better"},
+{t:"w",lvl:2,q:"Which word is an adverb of frequency?",o:["fast","never","here","very"],a:"never"},
+{t:"w",lvl:2,q:"Which word is a common noun?",o:["Ahmed","Monday","notebook","Nile"],a:"notebook"},
+{t:"w",lvl:2,q:"Which word is a subject pronoun?",o:["him","we","them","hers"],a:"we"},
+{t:"w",lvl:2,q:"Which word is a conjunction?",o:["although","always","almost","along"],a:"although"},
+{t:"w",lvl:2,q:"Which word is an interjection?",o:["hurray","hurry","hungry","hurt"],a:"hurray"},
+{t:"w",lvl:3,q:"Which word is a possessive pronoun?",o:["she","hers","herself","her"],a:"hers"},
+{t:"w",lvl:3,q:"Which word is a linking verb?",o:["became","brought","built","bought"],a:"became"},
+{t:"w",lvl:3,q:"Which word is a coordinating conjunction?",o:["however","therefore","so","although"],a:"so"},
+{t:"w",lvl:3,q:"Which word is a subordinating conjunction?",o:["and","but","unless","or"],a:"unless"},
+{t:"w",lvl:3,q:"Which word is a demonstrative pronoun?",o:["these","they","their","them"],a:"these"},
+{t:"w",lvl:3,q:"Which word is a modal verb?",o:["might","make","mind","move"],a:"might"},
+{t:"w",lvl:3,q:"Which word is a preposition of time?",o:["under","during","beside","toward"],a:"during"}
+];
+
+const $ = id => document.getElementById(id);
+const shuffle = arr => { const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+const buildQueue = () => [
+  ...shuffle(BANK.filter(q=>q.lvl===1)),
+  ...shuffle(BANK.filter(q=>q.lvl===2)),
+  ...shuffle(BANK.filter(q=>q.lvl===3))
+];
+function replay(el, cls, ms){
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls), ms);
+}
+
+let soundOn = true, actx = null;
+function tone(freq,dur,type="sine",vol=.16,delay=0){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+    const t=actx.currentTime+delay;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.start(t); o.stop(t+dur+.02);
+  }catch(e){}
+}
+const sfxGood = () => { tone(660,.14,"triangle"); tone(880,.2,"triangle",.14,.1); tone(220,.18,"sawtooth",.07,.02); };
+const sfxBad  = () => tone(150,.28,"sawtooth",.1);
+const sfxWin  = () => [523,659,784,1046].forEach((f,i)=>tone(f,.35,"triangle",.16,i*.13));
+
+const G = {
+  pos:0, target:6, over:false, live:false,
+  names:{A:"Team Rose",B:"Team Lavender"},
+  queue:{A:[],B:[]}, idx:{A:0,B:0}, cur:{A:null,B:null},
+  streak:{A:0,B:0}, locked:{A:false,B:false}
+};
+
+function renderPips(justSide){
+  [["A","pipsA"],["B","pipsB"]].forEach(([side,el])=>{
+    const won = side==="A" ? Math.max(0,G.pos) : Math.max(0,-G.pos);
+    let html="";
+    for(let i=0;i<G.target;i++){
+      const on = i<won, isNew = on && side===justSide && i===won-1;
+      html += '<span class="pip '+(on?"on ":"")+(isNew?"just":"")+'"></span>';
+    }
+    $(el).innerHTML = html;
+  });
+  if(justSide) setTimeout(()=>{
+    document.querySelectorAll(".pip.just").forEach(p=>p.classList.remove("just"));
+  },320);
+  // match point glow
+  $("zoneL").classList.toggle("hot", G.pos === G.target-1);
+  $("zoneR").classList.toggle("hot", -G.pos === G.target-1);
+}
+
+/* left team ahead (pos > 0) pulls the rope LEFT */
+function moveRope(){
+  const step = 24 / G.target;
+  const shift = Math.max(-24, Math.min(24, -G.pos*step));
+  $("assembly").style.transform = "translateX(calc(-50% + " + shift + "%))";
+}
+
+function pullSequence(side){
+  const winner = $(side==="A" ? "pullerA" : "pullerB");
+  const loser  = $(side==="A" ? "pullerB" : "pullerA");
+  const dust   = $(side==="A" ? "dustA"   : "dustB");
+  const shout  = $(side==="A" ? "shoutA"  : "shoutB");
+
+  winner.classList.add("dig");
+  loser.classList.add("drag");
+  setTimeout(()=>{ winner.classList.remove("dig"); loser.classList.remove("drag"); }, 620);
+
+  replay($("rig"), side==="A" ? "yankL" : "yankR", 520);
+  replay($("rope"), "taut", 470);
+  replay($("knot"), "whip", 520);
+  replay(dust, "go", 620);
+  shout.textContent = ["Heave!","Pull!","Yes!","Go!"][Math.random()*4|0];
+  replay(shout, "go", 920);
+  replay($("arena"), "shakeit", 470);
+  replay($(side==="A" ? "panelA" : "panelB"), "flash", 620);
+
+  moveRope();
+}
+
+function nextQuestion(side){
+  if(G.idx[side] >= G.queue[side].length){ G.queue[side]=buildQueue(); G.idx[side]=0; }
+  const q = G.queue[side][G.idx[side]++];
+  G.cur[side]=q; G.locked[side]=false;
+
+  const qEl=$(side==="A"?"qA":"qB"), oEl=$(side==="A"?"oA":"oB"),
+        fEl=$(side==="A"?"fA":"fB"), tEl=$(side==="A"?"tagA":"tagB");
+  fEl.textContent=""; fEl.className="feedback";
+
+  let options;
+  if(q.t==="s"){
+    tEl.textContent="Name the part of speech";
+    qEl.innerHTML = q.s.replace(/\*(.+?)\*/, '<span class="mark">$1</span>');
+    options = shuffle([q.a, ...shuffle(CLASSES.filter(c=>c!==q.a)).slice(0,3)]);
+  }else{
+    tEl.textContent="Choose the right word";
+    qEl.textContent = q.q;
+    options = shuffle(q.o);
+  }
+  oEl.innerHTML="";
+  options.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.textContent=opt;
+    b.addEventListener("click",()=>answer(side,opt,b));
+    oEl.appendChild(b);
+  });
+}
+
+function answer(side,choice,btn){
+  if(G.over || !G.live || G.locked[side]) return;
+  G.locked[side]=true;
+  const q=G.cur[side], correct = choice===q.a;
+  const fEl=$(side==="A"?"fA":"fB"), oEl=$(side==="A"?"oA":"oB");
+  [...oEl.children].forEach(b=>b.disabled=true);
+
+  if(correct){
+    btn.classList.add("right");
+    G.streak[side]++;
+    G.pos += (side==="A" ? 1 : -1);
+    fEl.textContent = ["Great pull!","Correct — heave!","Yes! The rope moves.","Well done!"][Math.random()*4|0];
+    fEl.className="feedback ok";
+    sfxGood(); pullSequence(side); renderPips(side);
+  }else{
+    btn.classList.add("wrong");
+    [...oEl.children].forEach(b=>{ if(b.textContent===q.a) b.classList.add("right"); });
+    G.streak[side]=0;
+    fEl.textContent = "Not this time — the answer is " + q.a + ".";
+    fEl.className="feedback no";
+    sfxBad();
+  }
+  $(side==="A"?"streakA":"streakB").textContent = "Streak " + G.streak[side];
+
+  if(Math.abs(G.pos) >= G.target){ setTimeout(()=>finish(G.pos>0?"A":"B"), 700); return; }
+  setTimeout(()=>nextQuestion(side), correct?900:1600);
+}
+
+function finish(side){
+  G.over=true; G.live=false;
+  const winner = $(side==="A" ? "pullerA" : "pullerB");
+  const loser  = $(side==="A" ? "pullerB" : "pullerA");
+  winner.classList.remove("dig","drag"); loser.classList.remove("dig","drag");
+  winner.classList.add("cheer"); loser.classList.add("slump");
+  $("zoneL").classList.remove("hot"); $("zoneR").classList.remove("hot");
+  sfxWin(); confettiBurst();
+  const w=G.names[side], l=G.names[side==="A"?"B":"A"];
+  $("winTitle").innerHTML = '<span class="'+(side==="A"?"a":"b")+'">'+w+'</span> wins the rope!';
+  $("winSub").textContent = w+" pulled "+G.target+" times. Good fight, "+l+" — rematch?";
+  setTimeout(()=>$("winOverlay").classList.remove("hide"), 900);
+}
+
+function confettiBurst(){
+  const box=$("confetti"), colors=["#FF4FA3","#8B5CF6","#2FD3A6","#FFC93C","#FF8FC1","#6FD8FF"];
+  for(let i=0;i<90;i++){
+    const c=document.createElement("div");
+    c.className="conf";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=colors[Math.random()*colors.length|0];
+    c.style.animationDuration=(2.2+Math.random()*1.8)+"s";
+    c.style.animationDelay=(Math.random()*.7)+"s";
+    box.appendChild(c);
+    setTimeout(()=>c.remove(),4600);
+  }
+}
+
+function startMatch(){
+  G.names.A = ($("inA").value||"Team Rose").trim();
+  G.names.B = ($("inB").value||"Team Lavender").trim();
+  G.pos=0; G.over=false; G.live=true;
+  G.streak={A:0,B:0}; G.queue={A:buildQueue(),B:buildQueue()}; G.idx={A:0,B:0};
+  ["pullerA","pullerB"].forEach(id=>$(id).classList.remove("cheer","slump","dig","drag"));
+  $("nameA").textContent=$("titleA").textContent=G.names.A;
+  $("nameB").textContent=$("titleB").textContent=G.names.B;
+  $("streakA").textContent=$("streakB").textContent="Streak 0";
+  renderPips(); moveRope();
+  nextQuestion("A"); nextQuestion("B");
+  $("startOverlay").classList.add("hide");
+  $("winOverlay").classList.add("hide");
+}
+
+$("targets").addEventListener("click",e=>{
+  const b=e.target.closest(".target"); if(!b) return;
+  [...$("targets").children].forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); G.target=+b.dataset.t; renderPips();
+});
+$("startBtn").addEventListener("click",startMatch);
+$("rematchBtn").addEventListener("click",startMatch);
+$("againBtn").addEventListener("click",()=>{
+  $("winOverlay").classList.add("hide");
+  $("startOverlay").classList.remove("hide");
+  G.live=false;
+});
+$("soundBtn").addEventListener("click",e=>{
+  soundOn=!soundOn;
+  e.currentTarget.textContent = soundOn ? "🔊 Sound on" : "🔇 Sound off";
+});
+document.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  const mapA={q:0,w:1,e:2,r:3}, mapB={u:0,i:1,o:2,p:3};
+  if(k in mapA){ const b=$("oA").children[mapA[k]]; if(b&&!b.disabled) b.click(); }
+  if(k in mapB){ const b=$("oB").children[mapB[k]]; if(b&&!b.disabled) b.click(); }
+});
+
+renderPips();
+</script>
+</body>
+</html>

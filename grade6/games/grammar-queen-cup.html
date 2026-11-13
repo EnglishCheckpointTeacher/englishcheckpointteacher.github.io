@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grammar Queen Cup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+:root{--rose:#ff4f9a;--roseD:#c8246f;--lav:#8f5cf7;--lavD:#5b2fc9;--plum:#3b1238;--ink:#4b2142;--muted:#8b6584;--gold:#ffd166;--goldD:#e0a92e;--mint:#1fbf86;--coral:#ff5a6e;--line:#f3cfe2;
+  --round:'Fredoka','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;--script:'Pacifico','Brush Script MT','Snell Roundhand',cursive}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#f6dcec;font-family:var(--round);color:var(--ink);-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#stage{position:absolute;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(circle at 10% 10%,#ffd9ea 0,transparent 35%),radial-gradient(circle at 90% 5%,#e6d8ff 0,transparent 38%),radial-gradient(circle at 85% 95%,#ffe0ef 0,transparent 35%),radial-gradient(circle at 5% 95%,#efe4ff 0,transparent 35%),#fff3f9}
+.scr{position:absolute;inset:0;display:none}
+.scr.on{display:block;animation:fin .35s ease}
+@keyframes fin{from{opacity:0}}
+button{font:inherit;cursor:pointer;border:none;color:inherit}
+textarea{font:inherit}
+.btn{white-space:nowrap;font-size:28px;font-weight:700;padding:16px 34px;border-radius:999px;background:linear-gradient(135deg,#ff7ab6,#ff4f9a 55%,#c552f0);color:#fff;box-shadow:0 6px 0 #b0306f;transition:transform .06s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b0306f}
+.btn.g{background:#fff;color:var(--roseD);box-shadow:0 6px 0 #f0bcd6}
+.btn.s{font-size:22px;padding:10px 22px;box-shadow:0 4px 0 #f0bcd6}
+.btn.s:not(.g){box-shadow:0 4px 0 #b0306f}
+.btn:disabled{opacity:.4}
+.panel{background:#fff;border-radius:30px;box-shadow:0 18px 40px rgba(214,73,141,.16)}
+.topbar{position:absolute;left:0;right:0;top:0;height:110px;display:flex;align-items:center;gap:18px;padding:0 40px}
+.topbar h2{font-family:var(--script);font-weight:400;font-size:46px;color:var(--rose)}
+.sp{flex:1}
+.row{display:flex;align-items:center;gap:16px}
+.lab{font-size:26px;font-weight:700;color:var(--plum)}
+.lab small{font-weight:500;color:var(--muted);font-size:21px}
+.note{font-size:22px;color:var(--muted);line-height:1.45}
+.pm{width:60px;height:60px;border-radius:50%;background:var(--rose);color:#fff;font-size:34px;font-weight:700;flex:none}
+.big{font-size:44px;font-weight:700;color:var(--plum);min-width:150px;text-align:center}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{font-size:21px;font-weight:600;padding:10px 16px;border-radius:999px;background:#fff0f6;color:var(--muted);border:3px solid transparent}
+.seg button.on{background:#fff;color:var(--rose);border-color:var(--rose)}
+/* home */
+.title{font-family:var(--script);font-weight:400;font-size:130px;line-height:1.15;background:linear-gradient(90deg,#ff4f9a,#c552f0 55%,#8f5cf7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding:0 20px 18px}
+.clsc{width:310px;padding:26px 10px;border-radius:30px;background:#fff;border:4px solid #ffd3e6;box-shadow:0 14px 30px rgba(214,73,141,.16);transition:transform .15s}
+.clsc:hover,.clsc:active{transform:translateY(-6px) scale(1.03);border-color:var(--rose)}
+.clsc .cn{font-size:62px;font-weight:700;color:var(--rose)}
+.clsc:nth-child(even) .cn{color:var(--lav)}
+.floaty{position:absolute;font-size:40px;font-weight:600;color:rgba(200,36,111,.08);white-space:nowrap;animation:drift linear infinite}
+@keyframes drift{from{transform:translateX(-500px)}to{transform:translateX(2400px)}}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
+/* setup */
+.chipgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.chip{font-size:21px;font-weight:600;padding:10px 12px;border-radius:16px;background:#fff0f6;color:var(--plum);border:3px solid #ffb3d4;text-align:left;display:flex;align-items:center;gap:10px;min-width:0}
+.chip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .ck{width:30px;height:30px;border-radius:50%;background:var(--rose);color:#fff;display:grid;place-items:center;font-size:17px;flex:none}
+.chip.off{background:#f6f1f4;color:#c0aab9;border-color:#eadde5;text-decoration:line-through}
+.chip.off .ck{background:#d9c8d2}
+.lgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ltog{display:flex;align-items:center;gap:8px;text-align:left;font-size:18px;font-weight:600;line-height:1.15;padding:8px 10px;border-radius:14px;border:3px solid #eee3ea;background:#fff;color:#b9a3b4;min-height:62px}
+.ltog .em{font-size:24px;flex:none}
+.ltog.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--plum)}
+.stog{font-size:20px;font-weight:600;padding:9px 16px;border-radius:999px;border:3px solid #eee3ea;background:#fff;color:#b9a3b4}
+.stog.on{border-color:var(--lav);background:#f5f0ff;color:var(--lavD)}
+.paste{width:100%;height:230px;border-radius:20px;border:3px dashed #ffb3d4;background:#fff7fb;padding:14px;font-size:20px;resize:none;color:var(--ink)}
+.paste:focus{outline:none;border-color:var(--rose)}
+/* bracket */
+#bk{position:absolute;left:30px;right:30px;top:180px;bottom:24px;display:flex;gap:16px}
+.col{flex:1;display:flex;flex-direction:column;min-width:0}
+.col h4{color:var(--lav);font-size:20px;text-align:center;letter-spacing:2px;margin-bottom:6px;height:28px}
+.col .ms{flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.mb{background:#fff;border:3px solid #fff;border-radius:14px;overflow:hidden;color:var(--muted);font-size:18px;box-shadow:0 6px 16px rgba(214,73,141,.12)}
+.mb .pl{display:flex;align-items:center;padding:3px 10px;gap:6px;height:27px;white-space:nowrap;overflow:hidden}
+.mb .pl+.pl{border-top:2px dotted var(--line)}
+.mb .pl .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.mb .pl .sc{font-weight:700;min-width:22px;text-align:right}
+.mb .pl.w{color:var(--plum);font-weight:700;background:linear-gradient(90deg,#fff1c2,#fff)}
+.mb .pl.l{opacity:.45;text-decoration:line-through}
+.mb.ready{border-color:#ffb3d4;cursor:pointer;color:var(--plum)}
+.mb.next{border-color:var(--rose);animation:glow 1.4s infinite alternate}
+.mb.bye{opacity:.45;box-shadow:none}
+@keyframes glow{to{box-shadow:0 0 0 6px rgba(255,79,154,.25),0 0 30px rgba(255,79,154,.45)}}
+.timebox{display:flex;align-items:center;gap:14px;background:#fff;border-radius:999px;padding:8px 20px;font-size:21px;box-shadow:0 6px 16px rgba(214,73,141,.12)}
+.timebox b{color:var(--rose);font-size:28px}
+.timebox .pm{width:42px;height:42px;font-size:24px}
+/* ready */
+.vs{position:absolute;inset:0;display:flex}
+.vs .side{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;color:#fff}
+.L{background:linear-gradient(160deg,#ff7ab6 0%,#e0307f 100%)}
+.R{background:linear-gradient(200deg,#a98bff 0%,#5b2fc9 100%)}
+.vs .nm{font-size:80px;font-weight:700;text-align:center;line-height:1.05;padding:0 40px;text-shadow:0 6px 0 rgba(0,0,0,.15)}
+.vs .av{width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.22);border:8px solid #fff;display:grid;place-items:center;font-size:80px;font-weight:700}
+.vsbadge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--script);font-size:96px;color:var(--rose);box-shadow:0 0 0 14px rgba(255,255,255,.35),0 20px 50px rgba(59,18,56,.3);animation:vsp 1s ease infinite alternate}
+@keyframes vsp{to{transform:translate(-50%,-50%) scale(1.08) rotate(-4deg)}}
+.slideL{animation:sl .6s cubic-bezier(.2,1.3,.4,1) both}.slideR{animation:sr .6s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes sl{from{transform:translateX(-500px);opacity:0}}@keyframes sr{from{transform:translateX(500px);opacity:0}}
+.rules{display:flex;gap:16px;justify-content:center}
+.rules div{background:rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:12px 20px;font-size:23px;font-weight:600;max-width:440px}
+/* match */
+.half{position:absolute;top:0;bottom:0;width:960px;padding:150px 30px 24px}
+.half.L{left:0}.half.R{right:0}
+.half::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(255,255,255,.12) 0,transparent 30%),radial-gradient(circle at 80% 30%,rgba(255,255,255,.1) 0,transparent 25%);pointer-events:none}
+.ph{position:relative;display:flex;align-items:center;gap:18px;color:#fff;height:96px}
+.half.L .ph{padding-right:300px}.half.R .ph{flex-direction:row-reverse;text-align:right;padding-left:300px}
+.ph .nm{font-size:40px;font-weight:700;flex:1;line-height:1.05;text-shadow:0 4px 0 rgba(0,0,0,.15);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.ph .score{font-size:88px;font-weight:700;min-width:140px;text-align:center;background:rgba(255,255,255,.22);border-radius:26px;line-height:1.08}
+.ph .streak{font-size:30px;font-weight:700;color:var(--gold);min-width:90px}
+.qc{position:relative;margin-top:14px;height:290px;background:#fff;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:44px 28px 16px;text-align:center;box-shadow:0 10px 0 rgba(0,0,0,.12)}
+.qc .qt{font-size:20px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;position:absolute;top:14px;left:22px;display:flex;gap:10px;align-items:center}
+.qc .qt i{font-style:normal;background:#fff0f6;color:var(--roseD);border-radius:999px;padding:2px 12px}
+.half.R .qc .qt i{background:#f3eeff;color:var(--lavD)}
+.qc .pass{position:absolute;top:10px;right:14px;font-size:19px;font-weight:700;padding:6px 14px;border-radius:999px;background:#f6eef3;color:var(--muted)}
+.qc .qq{font-size:44px;font-weight:600;color:var(--ink);line-height:1.3}
+.qc .qq .blank{display:inline-block;min-width:110px;border-bottom:5px solid var(--rose);margin:0 6px;transform:translateY(-6px)}
+.half.R .qc .qq .blank{border-color:var(--lav)}
+.qc .ask{font-size:28px;font-weight:600;color:var(--muted)}
+.qc.good{animation:okf .5s}.qc.bad{animation:shake .45s}
+@keyframes okf{0%{box-shadow:0 0 0 0 rgba(31,191,134,.9)}100%{box-shadow:0 0 0 40px rgba(31,191,134,0)}}
+@keyframes shake{20%{transform:translateX(-18px)}40%{transform:translateX(18px)}60%{transform:translateX(-10px)}80%{transform:translateX(10px)}}
+.reveal{position:absolute;inset:0;border-radius:28px;background:rgba(59,18,56,.93);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:40px;font-weight:700;padding:20px;line-height:1.25}
+.reveal small{font-size:22px;color:#f9c8df;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.reveal span{color:var(--gold)}
+.az{position:relative;margin-top:20px;height:470px}
+.lock .az>*,.lock .pass{opacity:.35;pointer-events:none}
+.lock .az::after{content:'❄️';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:120px;pointer-events:none;animation:cdz .5s both}
+/* choice */
+.opts{display:grid;gap:16px;height:100%}
+.opts.n2{grid-template-columns:1fr 1fr}
+.opts.n3{grid-template-rows:repeat(3,1fr)}
+.opts.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.opt{border-radius:24px;background:#fff;color:var(--ink);font-size:34px;font-weight:600;padding:10px 20px;line-height:1.2;box-shadow:0 7px 0 rgba(0,0,0,.18)}
+.opt.long{font-size:26px}
+.opt:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.opt.right{background:#d4f6e8;color:#0d6b4a;box-shadow:0 0 0 6px var(--mint)}
+.opt.wrong{background:#ffe0e4;color:#a3172b}
+.opt.out{opacity:.4}
+.tf .opt{font-size:52px}
+/* tap */
+.taps{height:100%;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:16px;background:rgba(255,255,255,.14);border-radius:28px;padding:20px}
+.taps .opt{font-size:38px;padding:18px 26px}
+/* keyboard */
+.tdisp{height:96px;background:rgba(255,255,255,.95);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:700;color:var(--ink);letter-spacing:2px;margin-bottom:16px;box-shadow:inset 0 0 0 4px rgba(0,0,0,.06)}
+.tdisp.empty{color:#cdb7c7;font-size:34px;letter-spacing:0}
+.tdisp .cur{display:inline-block;width:4px;height:52px;background:var(--rose);margin-left:4px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.kb{display:flex;flex-direction:column;gap:10px;align-items:center}
+.kb .kr{display:flex;gap:9px}
+.kb button{width:80px;height:78px;border-radius:16px;background:#fff;color:var(--ink);font-size:34px;font-weight:600;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.kb button:active,.kb button.pr{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.2);background:#ffe3f0}
+.kb .wide{width:300px;font-size:26px}
+.kb .fn{background:#f6e9f0;width:120px;font-size:30px}
+.kb .ok{background:var(--mint);color:#fff;width:200px;font-size:40px;box-shadow:0 5px 0 #138a60}
+/* match */
+.mt{display:grid;grid-template-columns:1fr 1fr;gap:26px;height:100%}
+.mcol{display:flex;flex-direction:column;gap:14px}
+.mi{flex:1;border-radius:22px;background:#fff;color:var(--ink);font-size:28px;font-weight:600;padding:8px 16px;line-height:1.2;box-shadow:0 6px 0 rgba(0,0,0,.18);border:5px solid transparent}
+.mi.sel{border-color:var(--gold);background:#fff8de;transform:scale(1.03)}
+.mi.done{opacity:.9;box-shadow:none;pointer-events:none}
+.mi.bad{background:#ffe0e4;animation:shake .4s}
+.mi.c0{background:#d4f6e8;border-color:#1fbf86}.mi.c1{background:#dbeaff;border-color:#4b8df2}.mi.c2{background:#fff1c2;border-color:#e0a92e}.mi.c3{background:#f3e6ff;border-color:#a066e8}
+/* order */
+.built{min-height:150px;background:rgba(255,255,255,.95);border-radius:24px;padding:16px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:12px;margin-bottom:18px;position:relative}
+.built:empty::before{content:'Tap the pieces in order ↓';color:#cdb7c7;font-size:30px;margin:auto}
+.bank{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;min-height:180px;align-content:flex-start}
+.tile{border-radius:18px;background:#fff;color:var(--ink);font-size:32px;font-weight:600;padding:14px 22px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.built .tile{background:#fff0f6;box-shadow:0 4px 0 #f0bcd6;font-size:30px}
+.half.R .built .tile{background:#f3eeff;box-shadow:0 4px 0 #d6c8fa}
+.clr{position:absolute;right:0;bottom:0;font-size:20px;font-weight:700;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.25);color:#fff}
+.plus{position:absolute;font-size:110px;font-weight:700;color:#fff;text-shadow:0 6px 0 rgba(31,191,134,.8);pointer-events:none;animation:plus 1s ease-out forwards;z-index:5}
+@keyframes plus{from{transform:translateY(0) scale(.5);opacity:1}to{transform:translateY(-160px) scale(1.2);opacity:0}}
+#hud{position:absolute;left:50%;top:0;transform:translateX(-50%);width:600px;height:142px;background:var(--plum);border-radius:0 0 40px 40px;z-index:4;display:flex;flex-direction:column;align-items:center;color:#fff;box-shadow:0 10px 30px rgba(59,18,56,.35);border:4px solid rgba(255,255,255,.4);border-top:none}
+#hud .rd{font-size:19px;font-weight:700;color:#ffb3d4;letter-spacing:3px;margin-top:6px}
+#hud .tm{font-size:68px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+#hud .tm.low{color:#ff8fa3;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+#hud .ctl{display:flex;gap:8px;margin-top:4px}
+#hud .ctl button{font-size:16px;font-weight:700;padding:5px 12px;border-radius:9px;background:rgba(255,255,255,.16);color:#fff}
+.tug{position:absolute;left:50%;top:156px;transform:translateX(-50%);width:300px;height:20px;border-radius:10px;background:linear-gradient(90deg,#ff7ab6,#a98bff);z-index:4;box-shadow:0 0 0 4px rgba(255,255,255,.5)}
+.tug i{position:absolute;top:-12px;width:44px;height:44px;margin-left:-22px;border-radius:50%;background:#fff;border:5px solid var(--gold);transition:left .5s cubic-bezier(.3,1.5,.5,1);font-style:normal;display:grid;place-items:center;font-size:20px}
+.ovl{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(59,18,56,.6)}
+.cd{font-size:340px;font-weight:700;color:#fff;text-shadow:0 0 60px rgba(255,79,154,.8);animation:cdz .9s ease-out both}
+@keyframes cdz{from{transform:scale(2.2);opacity:0}30%{opacity:1}to{transform:scale(.8);opacity:.9}}
+.sd{font-size:100px;font-weight:700;color:var(--gold);text-align:center;line-height:1.1;animation:cdz 1.2s both}
+.sd small{display:block;font-size:42px;color:#fff}
+/* result & champ */
+.winner{font-size:110px;font-weight:700;color:#fff;text-shadow:0 8px 0 rgba(0,0,0,.18);line-height:1.05;animation:wpop .7s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes wpop{from{transform:scale(.2);opacity:0}}
+.trophy{font-size:190px;animation:float 2s ease-in-out infinite alternate}
+@keyframes float{to{transform:translateY(-24px) rotate(4deg)}}
+.lb{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.lb div{background:#fff;border-radius:18px;padding:12px 22px;font-size:26px;font-weight:600;box-shadow:0 8px 20px rgba(214,73,141,.14)}
+.lb b{color:var(--rose)}
+.cname{font-family:var(--script);font-size:140px;line-height:1.2;background:linear-gradient(90deg,#ff4f9a,#c552f0,#8f5cf7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding:0 30px 20px}
+#fx{position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:30}
+#modal{position:absolute;inset:0;z-index:40;display:none;place-items:center;background:rgba(59,18,56,.55)}
+#modal.on{display:grid}
+#modal .box{background:#fff;border-radius:30px;padding:40px 50px;max-width:1100px;text-align:center;display:flex;flex-direction:column;gap:26px;align-items:center}
+#modal .box p{font-size:32px;font-weight:600;color:var(--plum);line-height:1.4}
+#modal input{font:inherit;font-size:40px;width:200px;text-align:center;border:3px solid var(--rose);border-radius:16px;padding:8px}
+</style></head><body>
+<div id="stage">
+  <section id="home" class="scr"></section>
+  <section id="setup" class="scr"></section>
+  <section id="bracket" class="scr"></section>
+  <section id="ready" class="scr"></section>
+  <section id="match" class="scr"></section>
+  <section id="result" class="scr"></section>
+  <section id="champ" class="scr"></section>
+  <canvas id="fx" width="1920" height="1080"></canvas>
+  <div id="modal"><div class="box"></div></div>
+</div>
+<script>
+/* =====================================================================
+   GRAMMAR QUEEN CUP · head-to-head grammar race · Grade 6
+   Each girl gets her OWN questions on her own half of the screen.
+   ===================================================================== */
+
+const LESSONS = [
+  {id:1, title:'Simple & Compound Sentences', em:'🌷', c:'#ff6fa8'},
+  {id:2, title:'Conjunctions', em:'🎀', c:'#b26cf0'},
+  {id:3, title:'Complex Sentences', em:'🦋', c:'#5b8cf2'},
+  {id:4, title:'Fragments & Run-ons', em:'🧁', c:'#f2789a'},
+  {id:5, title:'Appositives', em:'🌸', c:'#e65cbf'},
+  {id:6, title:'Action Verbs & Direct Objects', em:'💃', c:'#8f5cf7'},
+  {id:7, title:'Adjectives', em:'🌈', c:'#f08a4b'},
+  {id:8, title:'Relative Pronouns & Adverbs', em:'💌', c:'#d15b8f'},
+  {id:9, title:'Quotations', em:'💬', c:'#3fa7a0'},
+  {id:10, title:'Linking Verbs', em:'🔗', c:'#c86ad8'},
+  {id:11, title:'Verb Phrases', em:'✨', c:'#6c7cf0'},
+  {id:12, title:'Progressive Verb Forms', em:'🎠', c:'#e4609e'},
+];
+
+/* ---------- CLASS LISTS ---------- */
+const CLASSES = [
+ {id:'6E', names:`15951|Dema Ahmed Mahmoud Abdelsayed Abouelhamd
+14489|Elsharifa Fatima Elsayedbakry Ibrahim Bakry
+15047|Farida Mahmoud Abbas Abdelhasib Ibrahim
+15483|Fayroza Ahmed Mamdouh Mokhtar Morsy
+13550|Hala Ahmed Ibrahim Elsayed Bassyouni Eldod
+15122|Hala Hesham Mohamed Ali Mohamed
+15770|Joudy Nedal Farag Mohamed Badr
+15006|Karma Abdelmawla Moustafa Abouhemid
+15932|Kenda Ahmed Mohamed Abdelhakim Abdelhalim
+15574|Khalida Mustafa Abdalla Eltierifi
+15426|Kinda Khaled Zakaria Mohamed Zaki
+15255|Lara Ali Ali Abdalla El Batea
+15299|Lara Osama Ismail Fathi Ismail Zaid
+15065|Lareen Turki S Abuallief
+15846|Layan Alkhaiat
+15850|Leen Obada Taha Mahmoud
+14111|Lilia Rami Hankir
+15268|Lina Abdullah Yahia Saad Mansour
+15287|Mariam Wally Mohamed Abdelhakim Mohamed
+13536|Miar T.A. Afana|Miar Afana
+15976|Naya Mohammed Kamal Sbeih
+15973|Sarah Ahmed Ezzat Abdelhamid Saleh Doban
+14024|Sidra Aous O Balelah
+13979|Talia Mohamed Saleh Mohamed Saleh
+13364|Talya Ahmed Mahmoud Mokhtar Sayed Ahmed Hodieri
+15874|Yasmina Ahmed Mostafa Mohamed Mahdy`},
+ {id:'6G', names:`15821|Aatika Muhammad Umair
+15652|Amirah Husna Binti Syazaril Amzy
+15449|Bareea Kashif
+13201|Daniah Mohammed F Alasmari
+15803|Elleen Ala’a Hussein Alsatari
+14285|Fatema Sultan A Alharbi
+13085|Ghazal Yaser Qasem Farea
+15902|Hana Tarek Ahmed Mohamed Ahmed
+13264|Helda Alaaedin Aly
+15137|Irina Mohamed Ahmed Mohamed Ahmed Kandil
+13961|Joud Ahmed Fouad Elsayed Ahmed Omar
+14645|Karma Ahmed Mohamed Abobakr Mohamed Elshewy
+15887|Kenzy Ibrahim Yousef Yousef Abouyousef
+13237|Laura Bandar F Zughbi
+13336|Layan Amr Mahmoud Aly Elgharabawy
+15998|Layla Omer Zoheir
+15013|Mariam Karam Mostafa Mahmoud Sayed Ahmed Genedy
+15003|Maryam Mohamed Ahmed Moussa Yousseif Elsharnoubi
+13439|Maya Zahwa
+16005|Mouksheka Karthikeyan
+15175|Nour Mohammad Abdullah Al Harahsheh
+15275|Rahaf Mohamed Mahmoud Elwerdany Mangoud
+15177|Reem Hussein A Alkahtani
+13403|Rowayda Ali Ibrahim Shebl Ali Salem
+13334|Sarah Hani A Alsemmeari
+15961|Taleen Abdullah Ahmad Asfour
+13927|Warrd Abdullah M Shafee
+15856|Yara Mohamed Youssef Kamel Youssef Elkhateeb`},
+ {id:'6H', names:`15408|Asiya Osama Hassan Saad Zaghloul Hassan
+14060|Celine Hakeem Samim
+13787|Eleen Saeed S Bamukhayyar
+13923|Farah Muath Abdelmajid Alazzam
+15893|Gala Omer Bin Mahfuth
+14639|Galya Haitham Ibrahim Abu Sharar
+14767|Joury Abdullah
+13394|Karma Fadel Mohammed Mostafa Kamal Ebrahim
+15697|Karma Mohamed Salah Abdelgany Mohamed Elshamy
+15060|Lana Ahmed Mohamed Abdelatty Ibrahim
+14721|Lara Mostafa Essam Abdelmoneim Srror
+15135|Lulua Feras H Aldoubi
+15958|Mira Mohamed Samir Mohamed Abdrabou Ali
+14334|Mounira Ganoudi
+14082|Najla Hassan A Tounsi
+15327|Razan Mohamed Samer Mohamed Kotb Hussein
+15337|Renad Mohamed Husseine Mohamed Mohamed Sakr
+15927|Retal Abdulrhman T Alyafei
+15359|Rimas Ali Alhmidi
+13661|Rital Fahad Mohamed Almahamed
+15240|Sara Gamaleldin Elamir Mostafa Abouhessab
+15636|Sedra Noureldin Taha Fahim Mohamed Badr
+15155|Shaikha Masaud M Alhaider
+14052|Siham Yassin Ali Mohamedain
+14944|Ward Abdullah H Hamam`},
+ {id:'6I', names:`14405|Aleen Abobakr Mohammed Khalil
+15898|Aleen Mouhamad Alelawi
+13168|Daad Omar Zyadeh
+13941|Diana Khaled M Gisi
+13606|Elaf Yasser A Almosailem
+13668|Jana Raji Hani Baddad
+13505|Kenda Mohamed Mohamed
+15880|Lily Amr Wagih Abdelaziz Morsy
+13169|Lulwa Houssam Eddine Alhabash
+14614|Manissa Eyad Jamil Hamdan
+13361|Maria Mohammad Zaki Badawi
+13238|Mariam Ali Elsayed Ali Ismail
+13758|Maya Hazem Afify Tolba Afify
+13215|Mayan Reda Masoud Shahin
+13041|Razan Sa’ed Mahmoud Al Saleh
+14994|Reine Salim Ghraizi
+13243|Rilam Wadee J Khankar
+15944|Salma Samer Mahmoud Arigat
+13222|Sereen Emad M Al-Dabbagh
+13658|Sereen Hatem H Alharbi
+13891|Sidrah Rashed S Bayousuf
+13503|Suheir Taher Bakir
+13172|Taliyah Mohammad A Alghamdi
+14607|Yara Mohamad Arafa
+13029|Yasma Hawwa
+13044|Zaina Sultan M Bin Hassan`},
+].map(c=>({id:c.id, students:c.names.split('\n').map(l=>{ const [no,full,short]=l.split('|'); return {id:c.id+':'+no, no, full, short:short||full.split(' ').slice(0,2).join(' ')}; })}));
+
+/* =====================================================================
+   QUESTION BANKS  ·  add more lines to any bank — the game picks them up.
+   ===================================================================== */
+
+// 1) CHOICE bank from the Grammar Studio "Practise" checks (mcq / blank / fix / tf)
+const ORIGINAL = [{"id": "L1-o0", "l": 1, "t": "mcq", "q": "Mia and Leo packed and left.", "o": ["Simple", "Compound", "Complex"], "a": 0, "why": "One shared subject does two actions in one independent clause."}, {"id": "L1-o1", "l": 1, "t": "mcq", "q": "I tried, but the door stayed shut.", "o": ["Simple", "Compound", "Fragment"], "a": 1, "why": "I tried and the door stayed shut are independent clauses."}, {"id": "L1-o2", "l": 1, "t": "fix", "q": "Choose a compound sentence.", "o": ["The dog barked and ran.", "The dog barked, and I woke up.", "Because the dog barked."], "a": 1, "why": "Each side has its own complete subject–verb message."}, {"id": "L1-o3", "l": 1, "t": "blank", "q": "The bell rang ___ we hurried inside. (No joining word.)", "o": ["; ", ", ", ": "], "a": 0, "why": "A semicolon can join these independent clauses."}, {"id": "L1-o4", "l": 1, "t": "mcq", "q": "What is the subject in “The small birds sang”?", "o": ["small", "The small birds", "sang"], "a": 1, "why": "The small birds is the complete subject; birds is its head noun."}, {"id": "L1-o5", "l": 1, "t": "mcq", "q": "She opened the book and smiled.", "o": ["Simple", "Compound", "Compound-complex"], "a": 0, "why": "Opened and smiled share she. There is one independent clause."}, {"id": "L1-o6", "l": 1, "t": "fix", "q": "Which join is correct?", "o": ["I was hungry, I ate.", "I was hungry; I ate.", "I was hungry; so I ate."], "a": 1, "why": "The semicolon joins two related complete clauses."}, {"id": "L1-o7", "l": 1, "t": "mcq", "q": "A compound sentence must contain…", "o": ["two adjectives", "two or more independent clauses", "a because clause"], "a": 1, "why": "Independent clauses are the defining feature."}, {"id": "L2-o0", "l": 2, "t": "blank", "q": "We were thirsty, ___ we drank water.", "o": ["so", "yet", "nor"], "a": 0, "why": "So shows the result of being thirsty."}, {"id": "L2-o1", "l": 2, "t": "blank", "q": "I wanted to go, ___ I had to stay.", "o": ["for", "but", "so"], "a": 1, "why": "But marks a contrast between wish and reality."}, {"id": "L2-o2", "l": 2, "t": "blank", "q": "Both Mia ___ Leo helped.", "o": ["or", "nor", "and"], "a": 2, "why": "Both pairs with and."}, {"id": "L2-o3", "l": 2, "t": "blank", "q": "Neither the players nor the coach ___ ready.", "o": ["are", "is", "be"], "a": 1, "why": "Coach is the nearer singular subject, so is agrees."}, {"id": "L2-o4", "l": 2, "t": "mcq", "q": "“A present for you”: for is a…", "o": ["coordinating conjunction", "preposition", "relative pronoun"], "a": 1, "why": "For introduces the phrase for you; it does not join clauses."}, {"id": "L2-o5", "l": 2, "t": "blank", "q": "I trained hard, ___ I lost. Which stresses surprise?", "o": ["and", "yet", "for"], "a": 1, "why": "Yet emphasises an unexpected contrast; but could also express contrast."}, {"id": "L2-o6", "l": 2, "t": "fix", "q": "Choose parallel paired wording.", "o": ["She is both patient and kind.", "She both is patient and kindness.", "She is both patient or kind."], "a": 0, "why": "Patient and kind are parallel adjectives joined by both/and."}, {"id": "L2-o7", "l": 2, "t": "fix", "q": "Which sentence needs a comma in the handbook pattern?", "o": ["Mia sang and danced.", "Mia sang and Leo danced.", "Mia and Leo danced."], "a": 1, "why": "Mia sang and Leo danced are independent clauses: Mia sang, and Leo danced."}, {"id": "L3-o0", "l": 3, "t": "mcq", "q": "Because the bus was late, we walked. Which part is dependent?", "o": ["we walked", "Because the bus was late", "the bus"], "a": 1, "why": "Because makes this subject–verb clause dependent."}, {"id": "L3-o1", "l": 3, "t": "fix", "q": "Choose a complete complex sentence.", "o": ["Although I tried.", "I tried, and I succeeded.", "Although I tried, I failed."], "a": 2, "why": "It has one dependent clause and one independent clause."}, {"id": "L3-o2", "l": 3, "t": "blank", "q": "___ you finish, you may leave. Choose a condition.", "o": ["If", "Yet", "And"], "a": 0, "why": "If sets the condition for leaving."}, {"id": "L3-o3", "l": 3, "t": "fix", "q": "Choose the usual comma pattern.", "o": ["When it rained we stopped.", "When it rained, we stopped.", "When, it rained we stopped."], "a": 1, "why": "The introductory dependent clause is followed by a comma."}, {"id": "L3-o4", "l": 3, "t": "mcq", "q": "We waited until the bus arrived.", "o": ["Simple", "Complex", "Fragment"], "a": 1, "why": "We waited is independent; until the bus arrived is dependent."}, {"id": "L3-o5", "l": 3, "t": "mcq", "q": "I like soup, and I eat it when it is cold.", "o": ["Simple", "Compound only", "Compound-complex"], "a": 2, "why": "Two independent clauses are joined by and; when it is cold adds a dependent clause."}, {"id": "L3-o6", "l": 3, "t": "mcq", "q": "The rain stopped; however, we stayed inside.", "o": ["Compound", "Complex", "Fragment"], "a": 0, "why": "The semicolon joins two independent clauses. However is a linking adverb, not a subordinator."}, {"id": "L3-o7", "l": 3, "t": "mcq", "q": "Which normally fits before a following reason clause?", "o": ["a semicolon", "no separating punctuation", "a full stop"], "a": 1, "why": "We stayed inside because it rained is the usual continuous sentence."}, {"id": "L4-o0", "l": 4, "t": "mcq", "q": "Under the old bridge.", "o": ["Complete", "Fragment", "Compound"], "a": 1, "why": "This prepositional phrase has no independent clause."}, {"id": "L4-o1", "l": 4, "t": "mcq", "q": "We ran we caught the bus.", "o": ["Fragment", "Fused run-on", "Correct"], "a": 1, "why": "Two independent clauses have no boundary."}, {"id": "L4-o2", "l": 4, "t": "mcq", "q": "We ran, we caught the bus.", "o": ["Comma splice", "Simple", "Correct formal join"], "a": 0, "why": "The comma alone joins two independent clauses incorrectly here."}, {"id": "L4-o3", "l": 4, "t": "fix", "q": "Choose a repair.", "o": ["I was tired, I rested.", "I was tired; I rested.", "Because I was tired."], "a": 1, "why": "The semicolon provides a valid clause boundary."}, {"id": "L4-o4", "l": 4, "t": "mcq", "q": "Because I was tired, I rested.", "o": ["Fragment", "Complete complex sentence", "Run-on"], "a": 1, "why": "The independent clause I rested completes the dependent reason clause."}, {"id": "L4-o5", "l": 4, "t": "mcq", "q": "Running along the path. What is needed for a formal complete sentence?", "o": ["a longer adjective", "a subject and finite verb structure", "a comma at the end"], "a": 1, "why": "Mia was running along the path supplies a subject and a finite helping verb."}, {"id": "L4-o6", "l": 4, "t": "fix", "q": "Which is a correct imperative?", "o": ["Close the door.", "Closing the door.", "Because the door."], "a": 0, "why": "Close the door is complete: the subject you is understood in an imperative."}, {"id": "L4-o7", "l": 4, "t": "tf", "q": "A very long sentence is always a run-on.", "o": ["True", "False", "Only with adjectives"], "a": 1, "why": "Correct boundaries, not length, determine whether a sentence is a run-on."}, {"id": "L5-o0", "l": 5, "t": "mcq", "q": "Leo, our captain, scored. Which is the appositive?", "o": ["Leo", "our captain", "scored"], "a": 1, "why": "Our captain renames Leo."}, {"id": "L5-o1", "l": 5, "t": "mcq", "q": "An appositive is normally a…", "o": ["noun or noun phrase", "coordinating conjunction", "finite verb"], "a": 0, "why": "It names or renames another noun."}, {"id": "L5-o2", "l": 5, "t": "fix", "q": "Choose punctuation for extra information.", "o": ["Mia our only guide arrived.", "Mia, our only guide, arrived.", "Mia, our only guide arrived."], "a": 1, "why": "The middle appositive needs both boundary commas."}, {"id": "L5-o3", "l": 5, "t": "fix", "q": "Which is a relative clause rather than an appositive?", "o": ["a talented cook", "our new teacher", "who teaches English"], "a": 2, "why": "Who teaches English contains a verb and is a clause."}, {"id": "L5-o4", "l": 5, "t": "mcq", "q": "In a group of several poets, “the poet Rumi” usually has…", "o": ["no commas around Rumi", "one comma after poet", "a semicolon"], "a": 0, "why": "Rumi identifies which poet."}, {"id": "L5-o5", "l": 5, "t": "mcq", "q": "We visited the studio, a bright room upstairs. The phrase renames…", "o": ["We", "the studio", "upstairs"], "a": 1, "why": "A bright room upstairs renames the studio."}, {"id": "L5-o6", "l": 5, "t": "tf", "q": "The removal test alone always decides appositive commas.", "o": ["True", "False", "Only with names"], "a": 1, "why": "A sentence may remain grammatical yet lose needed identification. Context matters."}, {"id": "L5-o7", "l": 5, "t": "fix", "q": "Which places the appositive clearly?", "o": ["A violinist, my bicycle belongs to Leo.", "Leo, a violinist, owns this bicycle.", "Leo owns, a violinist, this bicycle."], "a": 1, "why": "A violinist sits beside and renames Leo."}, {"id": "L6-o0", "l": 6, "t": "mcq", "q": "Mia kicked the ball. The direct object is…", "o": ["Mia", "kicked", "the ball"], "a": 2, "why": "Kicked what? The ball."}, {"id": "L6-o1", "l": 6, "t": "mcq", "q": "Mia ran quickly. The direct object is…", "o": ["Mia", "quickly", "none"], "a": 2, "why": "Quickly is an adverb; ran has no direct object here."}, {"id": "L6-o2", "l": 6, "t": "mcq", "q": "Leo gave Mia a map. The indirect object is…", "o": ["Leo", "Mia", "a map"], "a": 1, "why": "Mia receives the map; a map is the direct object."}, {"id": "L6-o3", "l": 6, "t": "mcq", "q": "We walked to the library. “the library” is…", "o": ["a direct object", "the object of to", "the subject"], "a": 1, "why": "To the library is a prepositional phrase."}, {"id": "L6-o4", "l": 6, "t": "mcq", "q": "The soup smells delicious. Smells is…", "o": ["action here", "linking here", "a noun"], "a": 1, "why": "It connects soup to a description rather than taking an object."}, {"id": "L6-o5", "l": 6, "t": "mcq", "q": "The chef prepared a hot meal. Choose the complete direct object.", "o": ["meal", "a hot meal", "The chef"], "a": 1, "why": "Meal is the head noun; a hot meal is the whole object phrase."}, {"id": "L6-o6", "l": 6, "t": "mcq", "q": "She bought bread and milk.", "o": ["Two coordinated direct objects", "No direct object", "Two subjects"], "a": 0, "why": "Bought what? Bread and milk."}, {"id": "L6-o7", "l": 6, "t": "mcq", "q": "They praised him. Which is the direct object?", "o": ["They", "praised", "him"], "a": 2, "why": "Praised whom? Him. Objects can be pronouns."}, {"id": "L7-o0", "l": 7, "t": "mcq", "q": "The bright room is quiet. Which are descriptive adjectives?", "o": ["bright and quiet", "The and is", "room and quiet"], "a": 0, "why": "Both bright and quiet describe room."}, {"id": "L7-o1", "l": 7, "t": "mcq", "q": "In “very cold water”, very is…", "o": ["a noun", "an adverb", "a descriptive adjective"], "a": 1, "why": "Very modifies cold, an adjective."}, {"id": "L7-o2", "l": 7, "t": "mcq", "q": "A precise replacement for “very cold” is…", "o": ["nice", "freezing", "big"], "a": 1, "why": "Freezing conveys the temperature more precisely."}, {"id": "L7-o3", "l": 7, "t": "mcq", "q": "Which is a proper adjective?", "o": ["Italian", "quiet", "small"], "a": 0, "why": "Italian is formed from a proper place name and is capitalised."}, {"id": "L7-o4", "l": 7, "t": "mcq", "q": "“Those shoes”: those tells…", "o": ["which ones", "how the action happened", "what tense"], "a": 0, "why": "Those points out a particular set of shoes."}, {"id": "L7-o5", "l": 7, "t": "mcq", "q": "“Seven birds”: seven tells…", "o": ["what kind", "how many", "how much speed"], "a": 1, "why": "Seven gives a number."}, {"id": "L7-o6", "l": 7, "t": "fix", "q": "Choose the more usual adjective order.", "o": ["a leather brown old bag", "an old brown leather bag", "a brown leather old bag"], "a": 1, "why": "Age usually comes before colour, then material."}, {"id": "L7-o7", "l": 7, "t": "mcq", "q": "The soup is hot. Hot is a…", "o": ["predicate adjective", "direct object", "helping verb"], "a": 0, "why": "Hot follows a linking verb and describes soup."}, {"id": "L8-o0", "l": 8, "t": "blank", "q": "The girl ___ won is my friend.", "o": ["whom", "who", "whose"], "a": 1, "why": "Who is the subject of won."}, {"id": "L8-o1", "l": 8, "t": "blank", "q": "The person ___ I invited… Which is the formal object form?", "o": ["whom", "whose", "which"], "a": 0, "why": "I invited him/her, so formal whom fits. Who is common informally."}, {"id": "L8-o2", "l": 8, "t": "blank", "q": "The girl ___ bag is missing…", "o": ["who", "whose", "whom"], "a": 1, "why": "Whose marks possession of the bag."}, {"id": "L8-o3", "l": 8, "t": "blank", "q": "My bike, ___ is blue, is outside.", "o": ["that", "which", "where"], "a": 1, "why": "A non-defining clause about a thing uses which, not that."}, {"id": "L8-o4", "l": 8, "t": "mcq", "q": "The book which I borrowed was useful. In British English this is…", "o": ["incorrect only because of which", "a valid defining relative clause", "a comma splice"], "a": 1, "why": "Which is allowed in defining clauses in British English; that also works."}, {"id": "L8-o5", "l": 8, "t": "blank", "q": "This is the room ___ we met.", "o": ["where", "whom", "whose"], "a": 0, "why": "Where supplies the place relationship: in which we met."}, {"id": "L8-o6", "l": 8, "t": "mcq", "q": "“Students who passed celebrated” means…", "o": ["all students definitely passed", "the students who passed celebrated", "nobody celebrated"], "a": 1, "why": "The defining clause limits the group to those who passed."}, {"id": "L8-o7", "l": 8, "t": "fix", "q": "Which identifies the direct object of visited?", "o": ["the town where I visited", "the town that I visited", "the town when I visited"], "a": 1, "why": "Visited takes town as its object, so that fits; which also fits."}, {"id": "L9-o0", "l": 9, "t": "fix", "q": "Choose classroom dialogue punctuation.", "o": ["“I am ready.” she said.", "“I am ready,” she said.", "“I am ready”, she said."], "a": 1, "why": "Use a comma inside the closing mark before a following statement tag."}, {"id": "L9-o1", "l": 9, "t": "fix", "q": "Choose question + tag punctuation.", "o": ["“Ready?,” she asked.", "“Ready?” She asked.", "“Ready?” she asked."], "a": 2, "why": "The question mark stays; no additional comma is needed. The tag continues in lower case."}, {"id": "L9-o2", "l": 9, "t": "mcq", "q": "Leo said that he was ready.", "o": ["Direct speech", "Reported speech", "Appositive"], "a": 1, "why": "The sentence reports meaning without quotation marks."}, {"id": "L9-o3", "l": 9, "t": "tf", "q": "An indirect report proves the speaker’s exact wording.", "o": ["True", "False", "Only if it uses that"], "a": 1, "why": "Several original wordings may lead to the same report."}, {"id": "L9-o4", "l": 9, "t": "tf", "q": "When converting a report into a fictional direct quote, said must become says.", "o": ["True", "False", "Only for questions"], "a": 1, "why": "The reporting verb may stay said: “I am ready,” Leo said."}, {"id": "L9-o5", "l": 9, "t": "mcq", "q": "A new speaker in a story normally gets…", "o": ["a new paragraph", "a semicolon only", "no punctuation"], "a": 0, "why": "A new paragraph helps the reader follow who speaks."}, {"id": "L9-o6", "l": 9, "t": "fix", "q": "Choose a split spoken sentence.", "o": ["“If it rains,” she said, “we will wait.”", "“If it rains.” she said “We will wait.”", "“If it rains,” She said, “We will wait.”"], "a": 0, "why": "The second speech segment continues the same sentence, so we is lower case."}, {"id": "L9-o7", "l": 9, "t": "mcq", "q": "A fictional “famous-person quote” should be…", "o": ["presented as verified", "clearly labelled invented", "left unattributed but claimed true"], "a": 1, "why": "Do not attribute invented words as a real quotation."}, {"id": "L10-o0", "l": 10, "t": "mcq", "q": "The soup tastes salty. Tastes is…", "o": ["linking", "action with a direct object", "helping"], "a": 0, "why": "Salty describes soup."}, {"id": "L10-o1", "l": 10, "t": "mcq", "q": "Leo tasted the soup. Tasted is…", "o": ["linking", "action", "an adjective"], "a": 1, "why": "Leo performs tasting; the soup is the object."}, {"id": "L10-o2", "l": 10, "t": "mcq", "q": "Mia became captain. Captain is…", "o": ["a direct object", "a predicate nominative", "a helping verb"], "a": 1, "why": "Captain renames Mia after became."}, {"id": "L10-o3", "l": 10, "t": "mcq", "q": "The sky looks dark. Dark is…", "o": ["a predicate adjective", "an indirect object", "a noun subject"], "a": 0, "why": "Dark describes sky after looks."}, {"id": "L10-o4", "l": 10, "t": "mcq", "q": "The flowers smell wonderful. The subject is…", "o": ["wonderful", "smell", "The flowers"], "a": 2, "why": "The flowers is what the sentence describes."}, {"id": "L10-o5", "l": 10, "t": "fix", "q": "Which uses grew as a linking verb?", "o": ["She grew flowers.", "The flowers grew tall.", "She grew three roses."], "a": 1, "why": "Tall describes the flowers; the other examples take objects."}, {"id": "L10-o6", "l": 10, "t": "mcq", "q": "Which uses a noun complement?", "o": ["Mia is cheerful.", "Mia is a guide.", "Mia smiled."], "a": 1, "why": "A guide renames Mia. Cheerful is an adjective instead."}, {"id": "L10-o7", "l": 10, "t": "mcq", "q": "The is/are swap is…", "o": ["a useful clue, checked with meaning", "proof every time", "only for direct objects"], "a": 0, "why": "Confirm that the complement actually describes or renames the subject."}, {"id": "L11-o0", "l": 11, "t": "mcq", "q": "She has been reading. The verb words are…", "o": ["has reading", "has been reading", "She has been"], "a": 1, "why": "Has and been help the main verb reading."}, {"id": "L11-o1", "l": 11, "t": "mcq", "q": "She might not have finished. List the handbook’s verb words.", "o": ["might not have finished", "might have finished", "not have"], "a": 1, "why": "Might and have help finished; not is not a verb word."}, {"id": "L11-o2", "l": 11, "t": "mcq", "q": "Have you ever been there? The verb words are…", "o": ["Have been", "you ever", "ever been there"], "a": 0, "why": "Have helps been; subject and adverb interrupt them."}, {"id": "L11-o3", "l": 11, "t": "mcq", "q": "We should have left. The main lexical verb is…", "o": ["should", "have", "left"], "a": 2, "why": "Left carries the main action; should and have are helpers."}, {"id": "L11-o4", "l": 11, "t": "mcq", "q": "Which expresses obligation most strongly?", "o": ["might", "must", "could"], "a": 1, "why": "Must expresses strong obligation in this context."}, {"id": "L11-o5", "l": 11, "t": "mcq", "q": "I quickly ran home. Quickly is…", "o": ["a helper", "an adverb", "the main verb"], "a": 1, "why": "Quickly modifies ran; it is not a helping verb."}, {"id": "L11-o6", "l": 11, "t": "blank", "q": "They ___ been waiting. (Current duration.)", "o": ["have", "has", "is"], "a": 0, "why": "Have agrees with they; have been waiting is present perfect progressive."}, {"id": "L11-o7", "l": 11, "t": "mcq", "q": "Can you swim? The helper is…", "o": ["you", "Can", "swim"], "a": 1, "why": "Can is a modal helper; swim is the main verb."}, {"id": "L12-o0", "l": 12, "t": "mcq", "q": "She is reading now.", "o": ["Present progressive", "Past progressive", "Future progressive"], "a": 0, "why": "Is + reading marks present progressive."}, {"id": "L12-o1", "l": 12, "t": "mcq", "q": "They were waiting.", "o": ["Present progressive", "Past progressive", "Future progressive"], "a": 1, "why": "Were + waiting marks past progressive."}, {"id": "L12-o2", "l": 12, "t": "mcq", "q": "I will be travelling at noon.", "o": ["Present progressive", "Past progressive", "Future progressive"], "a": 2, "why": "Will be + travelling marks future progressive."}, {"id": "L12-o3", "l": 12, "t": "blank", "q": "I ___ reading right now.", "o": ["am", "are", "were"], "a": 0, "why": "Am agrees with I in the present progressive."}, {"id": "L12-o4", "l": 12, "t": "mcq", "q": "Choose the -ing spelling of write.", "o": ["writeing", "writing", "writting"], "a": 1, "why": "Drop the silent final e before adding -ing."}, {"id": "L12-o5", "l": 12, "t": "mcq", "q": "Choose the -ing spelling of run.", "o": ["runing", "running", "runeing"], "a": 1, "why": "Double n after this short stressed vowel + final consonant."}, {"id": "L12-o6", "l": 12, "t": "mcq", "q": "For a normal state of knowledge, choose…", "o": ["I am knowing the answer.", "I know the answer.", "I knowing the answer."], "a": 1, "why": "Know normally describes a state and uses the simple form here."}, {"id": "L12-o7", "l": 12, "t": "mcq", "q": "I am thinking about the puzzle.", "o": ["Valid progressive activity", "Always wrong: think is stative", "Past progressive"], "a": 0, "why": "Thinking about describes an active mental process; think meaning believe is different."}];
+
+// 2) CHOICE bank: [lesson, type, prompt, options, correctIndex, why]
+//    type = 'mcq' | 'blank' | 'fix' | 'tf' | 'tap'  (tap: options are the sentence pieces, in order)
+const EXTRA = [
+ // 1 · Simple & compound
+ [1,'tap','Tap the joining word.',['The sun set,','but','the sky','stayed bright.'],1,'But is the FANBOYS word joining two independent clauses.'],
+ [1,'tap','Tap the verb.',['The tall girl','quickly','climbed','the old tree.'],2,'Climbed is the action the subject does.'],
+ [1,'tf','“Tom and Jerry ran home” is a compound sentence because it has two names.',['True','False'],1,'Two names share one verb: one independent clause, so it is simple.'],
+ [1,'tf','A semicolon can join two independent clauses without a FANBOYS word.',['True','False'],0,'Yes: “The rain stopped; we went outside.”'],
+ [1,'fix','Which sentence is punctuated correctly?',['I like tea, and my sister likes coffee.','I like tea and, my sister likes coffee.','I like tea, my sister likes coffee.'],0,'Comma goes before the FANBOYS word. A comma alone makes a comma splice.'],
+ [1,'fix','Choose the compound sentence.',['Lina sang and danced at the party.','Lina sang; her brother played the piano.','Lina and her brother at the party.'],1,'Two independent clauses joined by a semicolon.'],
+ [1,'blank','We could watch a film, ___ we could play a game.',['or','nor','for'],0,'Or shows a choice between two options.'],
+ [1,'blank','The test was hard___ I passed it. (Show contrast.)',[', but',', so',' and'],0,'Contrast needs but, with a comma before it.'],
+ [1,'mcq','The puppy jumped, barked and wagged its tail.',['Simple','Compound','Fragment'],0,'One subject (the puppy) does three actions: still one clause.'],
+ [1,'mcq','My friend called, so I answered the phone.',['Simple','Compound','Fragment'],1,'My friend called + I answered the phone: two independent clauses.'],
+ [1,'mcq','How many independent clauses? “The wind blew, and the leaves fell, but nobody noticed.”',['1','2','3'],2,'The wind blew / the leaves fell / nobody noticed.'],
+ // 2 · Conjunctions
+ [2,'tap','Tap the coordinating conjunction.',['I was tired,','yet','I kept','reading.'],1,'Yet is a FANBOYS word showing surprising contrast.'],
+ [2,'blank','She didn’t eat lunch, ___ did she eat dinner.',['nor','or','so'],0,'Nor adds a second negative idea.'],
+ [2,'blank','Either you tidy your room ___ you lose screen time.',['or','nor','and'],0,'Either pairs with or.'],
+ [2,'blank','Not only did we win, ___ we also broke the record.',['but','and','yet'],0,'Not only pairs with but also.'],
+ [2,'blank','Neither the cat nor the dogs ___ hungry.',['are','is','am'],0,'The verb agrees with the nearer subject: the dogs → are.'],
+ [2,'blank','The cake was delicious, ___ it was too sweet for me.',['but','so','for'],0,'But shows contrast between the two ideas.'],
+ [2,'mcq','Which FANBOYS word gives a reason?',['for','so','or'],0,'For = because: “I stayed in, for it was cold.”'],
+ [2,'mcq','Which FANBOYS word shows a result?',['so','for','nor'],0,'So shows what happened as a result.'],
+ [2,'mcq','“Both … and” is a…',['paired (correlative) conjunction','preposition','linking verb'],0,'Both/and, either/or, neither/nor and not only/but also work in pairs.'],
+ [2,'tf','You always need a comma before “and”.',['True','False'],1,'Use comma + and when it joins two independent clauses, not every time.'],
+ [2,'fix','Which sentence is parallel?',['I like swimming, hiking, and to run.','I like swimming, hiking, and running.','I like to swim, hiking, and running.'],1,'All three items use the same -ing form.'],
+ // 3 · Complex
+ [3,'tap','Tap the subordinating conjunction.',['We stayed inside','because','it was','snowing.'],1,'Because starts the dependent clause and gives a reason.'],
+ [3,'blank','I will call you ___ I get home. (time)',['when','but','so'],0,'When gives the time.'],
+ [3,'blank','Keep stirring ___ the sauce thickens. (endpoint)',['until','although','or'],0,'Until gives the endpoint.'],
+ [3,'mcq','Although it was cold, we swam.',['Complex','Compound','Simple'],0,'A dependent clause (Although it was cold) + an independent clause.'],
+ [3,'mcq','If you water the plant, it will grow. Which part is independent?',['If you water the plant','it will grow','water'],1,'It will grow can stand alone.'],
+ [3,'mcq','Which sentence is complex?',['I ran, and I won.','I ran because I was late.','I ran fast.'],1,'Because I was late is a dependent clause.'],
+ [3,'mcq','Which word shows contrast?',['although','because','if'],0,'Although sets up a contrast.'],
+ [3,'tf','A dependent clause has a subject and a verb.',['True','False'],0,'It has both, but it cannot stand alone.'],
+ [3,'tf','“When the bell rings.” is a complete sentence.',['True','False'],1,'It is a dependent clause: we need the rest of the idea.'],
+ [3,'fix','Choose the correct comma use.',['We stayed home, because it rained.','We stayed home because it rained.','We stayed, home because it rained.'],1,'A because clause after the main clause normally takes no comma.'],
+ [3,'fix','Choose the correct sentence.',['After we ate dinner, we washed the dishes.','After we ate dinner we, washed the dishes.','After, we ate dinner we washed the dishes.'],0,'An introductory dependent clause is followed by a comma.'],
+ // 4 · Fragments & run-ons
+ [4,'mcq','The girl with the red umbrella.',['Fragment','Complete sentence','Run-on'],0,'There is a subject but no verb.'],
+ [4,'mcq','It was raining we stayed inside.',['Fused run-on','Fragment','Correct'],0,'Two independent clauses with nothing between them.'],
+ [4,'mcq','My phone died, I couldn’t call you.',['Comma splice','Correct','Fragment'],0,'Only a comma joins two independent clauses.'],
+ [4,'mcq','Walking to school every morning.',['Fragment','Complete sentence','Comma splice'],0,'No subject and no finite verb.'],
+ [4,'mcq','What is missing in “Ate all the cookies.”?',['a subject','a verb','a comma'],0,'Who ate? The sentence needs a subject.'],
+ [4,'mcq','Which is NOT a way to fix a run-on?',['add only a comma','add a full stop','add a comma + FANBOYS'],0,'A comma alone creates a comma splice.'],
+ [4,'fix','Fix the run-on: “The movie ended everyone clapped.”',['The movie ended, everyone clapped.','The movie ended, and everyone clapped.','The movie ended and, everyone clapped.'],1,'Comma + and correctly joins the two clauses.'],
+ [4,'fix','Fix the fragment: “Because we missed the bus.”',['Because we missed the bus, we were late.','Because we missed the bus late.','Because, we missed the bus.'],0,'Adding an independent clause completes the idea.'],
+ [4,'fix','Which is correct?',['I love art; it makes me happy.','I love art it makes me happy.','I love art, it makes me happy.'],0,'The semicolon makes a proper boundary.'],
+ [4,'tf','“Stop!” is a complete sentence.',['True','False'],0,'It is an imperative: the subject (you) is understood.'],
+ [4,'tf','A short sentence can still be a run-on.',['True','False'],0,'“I ran I fell.” is short but fused.'],
+ // 5 · Appositives
+ [5,'tap','Tap the appositive.',['My aunt,','a famous chef,','made','dinner.'],1,'A famous chef renames my aunt.'],
+ [5,'tap','Tap the noun the appositive renames.',['Paris,','the capital of France,','is','beautiful.'],0,'The capital of France renames Paris.'],
+ [5,'fix','Choose the correct punctuation.',['Mr Khan, our science teacher, loves rockets.','Mr Khan our science teacher, loves rockets.','Mr Khan, our science teacher loves rockets.'],0,'Extra information in the middle needs a pair of commas.'],
+ [5,'fix','Choose the correct sentence.',['I met Sara, the new student.','I met, Sara, the new student.','I met Sara the new student,.'],0,'An appositive at the end takes one opening comma.'],
+ [5,'fix','Combine: “Rumi wrote poems. Rumi was a poet.”',['Rumi, a poet, wrote poems.','Rumi a poet wrote, poems.','Rumi, wrote poems, a poet.'],0,'The appositive a poet sits right after Rumi.'],
+ [5,'mcq','Which sentence contains an appositive?',['Our dog, a fluffy poodle, sleeps all day.','Our dog sleeps all day.','Our dog, who is fluffy, sleeps.'],0,'A fluffy poodle is a noun phrase renaming our dog.'],
+ [5,'mcq','“My brother Ali is a doctor.” (I have three brothers.) Why no commas?',['Ali is needed to show which brother','Ali is extra information','Names never take commas'],0,'Ali identifies which brother, so it is essential.'],
+ [5,'blank','Max, ___, won the race.',['my best friend','ran fast','quickly'],0,'An appositive is a noun phrase that renames Max.'],
+ [5,'tf','An appositive can come at the end of a sentence.',['True','False'],0,'“I met Sara, the new student.”'],
+ [5,'tf','An appositive is a verb phrase.',['True','False'],1,'It is a noun or noun phrase.'],
+ // 6 · Action verbs & direct objects
+ [6,'tap','Tap the action verb.',['The chef','chopped','the onions','carefully.'],1,'Chopped is the action.'],
+ [6,'tap','Tap the direct object.',['Sara','painted','a beautiful picture','yesterday.'],2,'Painted what? A beautiful picture.'],
+ [6,'tap','Tap the indirect object.',['Dad','bought','me','a new bike.'],2,'Bought a bike for whom? Me.'],
+ [6,'mcq','The baby slept peacefully. The direct object is…',['the baby','peacefully','none'],2,'Slept what? Nothing: no direct object.'],
+ [6,'mcq','Which question finds the direct object?',['verb + what/whom?','where?','when?'],0,'Ask the verb + what or whom.'],
+ [6,'mcq','Which verb shows a mental action?',['imagined','jumped','threw'],0,'Imagining happens in the mind.'],
+ [6,'mcq','Grandma told us a story. The direct object is…',['us','a story','Grandma'],1,'Told what? A story. Us is the indirect object.'],
+ [6,'mcq','She threw the ball to her dog. “her dog” is…',['the object of the preposition to','the indirect object','the subject'],0,'It belongs to the prepositional phrase to her dog.'],
+ [6,'fix','Which sentence has a direct object?',['The children laughed.','The children built a snowman.','The children are happy.'],1,'Built what? A snowman.'],
+ [6,'tf','Every action verb must have a direct object.',['True','False'],1,'“She laughed.” has an action verb and no object.'],
+ // 7 · Adjectives
+ [7,'tap','Tap the descriptive adjective.',['The','fluffy','kitten','slept.'],1,'Fluffy describes the kitten.'],
+ [7,'tap','Tap the predicate adjective.',['The cake','was','delicious','today.'],2,'Delicious comes after the linking verb and describes the cake.'],
+ [7,'mcq','Which adjective tells how many?',['several','red','tiny'],0,'Several tells how many.'],
+ [7,'mcq','Which is a proper adjective?',['Egyptian','ancient','huge'],0,'Egyptian comes from a proper noun, so it has a capital letter.'],
+ [7,'mcq','A more precise word for “very big” is…',['enormous','nice','good'],0,'Enormous is stronger and clearer.'],
+ [7,'mcq','A more precise word for “very tired” is…',['exhausted','fine','happy'],0,'Exhausted means very tired.'],
+ [7,'mcq','“This, that, these, those” tell…',['which one(s)','how many','what kind'],0,'They point out which one(s).'],
+ [7,'mcq','In “the old wooden box”, which adjective tells the material?',['wooden','old','box'],0,'Wooden tells what it is made of.'],
+ [7,'fix','Choose the usual adjective order.',['a beautiful small round table','a round small beautiful table','a small round beautiful table'],0,'Opinion → size → shape.'],
+ [7,'fix','Choose the usual adjective order.',['two lovely red roses','red two lovely roses','lovely red two roses'],0,'Number → opinion → colour.'],
+ [7,'tf','An adjective can describe a pronoun.',['True','False'],0,'“She is kind.” Kind describes she.'],
+ // 8 · Relative pronouns & adverbs
+ [8,'tap','Tap the relative pronoun.',['The boy','who','sits next to me','is funny.'],1,'Who introduces the relative clause about the boy.'],
+ [8,'blank','The dog ___ tail is curly is mine.',['whose','who','which'],0,'Whose shows possession.'],
+ [8,'blank','I remember the day ___ we met.',['when','where','who'],0,'When introduces a clause about a time.'],
+ [8,'blank','Do you know the reason ___ she left?',['why','where','whom'],0,'Why introduces a clause about a reason.'],
+ [8,'blank','The cake ___ she baked was delicious.',['that','who','whom'],0,'That works for things in a defining clause.'],
+ [8,'blank','Dr Amal, ___ works at the hospital, is my aunt.',['who','that','which'],0,'Who for a person; that cannot be used with commas.'],
+ [8,'blank','This is the park ___ we play football.',['where','which','whose'],0,'Where introduces a clause about a place.'],
+ [8,'mcq','Which relative pronoun refers to things?',['which','who','whom'],0,'Which is for things.'],
+ [8,'fix','Choose the correct sentence.',['My mother, who is a nurse, works at night.','My mother, that is a nurse, works at night.','My mother who is a nurse, works at night.'],0,'Extra information: who + a pair of commas.'],
+ [8,'tf','Non-defining (extra information) relative clauses use commas.',['True','False'],0,'Commas show the information is extra.'],
+ [8,'tf','You can use “that” in a non-defining clause with commas.',['True','False'],1,'Use who or which with commas, not that.'],
+ // 9 · Quotations
+ [9,'fix','Choose the correct punctuation.',['Leo said, “Let’s go.”','Leo said “Let’s go.”','Leo said, “let’s go.”'],0,'Comma after the tag, capital to start the spoken sentence.'],
+ [9,'fix','Choose the correct punctuation.',['“Watch out!” shouted Mia.','“Watch out!,” shouted Mia.','“Watch out”! shouted Mia.'],0,'Keep the ! inside the marks and add no comma.'],
+ [9,'fix','Change to reported speech: Sara said, “I am hungry.”',['Sara said that she was hungry.','Sara said that I am hungry.','Sara said, she is “hungry.”'],0,'The pronoun changes to she; no quotation marks.'],
+ [9,'fix','Change to reported speech: Ali said, “I will call you tomorrow.”',['Ali said that he would call me the next day.','Ali said that I will call you tomorrow.','Ali said “he would call.”'],0,'Pronouns and time words change; no quotation marks.'],
+ [9,'blank','Mom said___ “Dinner is ready.”',[',','.',';'],0,'When the tag comes first, a comma follows it.'],
+ [9,'mcq','“I love pizza,” said Sam. This is…',['Direct speech','Reported speech','An appositive'],0,'The exact words are inside quotation marks.'],
+ [9,'mcq','In “Are you coming?” asked Dad — why is there no comma?',['The question mark replaces it','Commas are never used','Dad is a name'],0,'Keep the ? instead of adding a comma.'],
+ [9,'mcq','In “We won!” cheered the team, the speaker tag is…',['cheered the team','We won','the exclamation mark'],0,'The tag tells who spoke and how.'],
+ [9,'tf','Reported speech uses quotation marks.',['True','False'],1,'Reported speech gives the meaning, not the exact words.'],
+ [9,'tf','A full spoken sentence starts with a capital letter.',['True','False'],0,'Leo said, “The bus is here.”'],
+ // 10 · Linking verbs
+ [10,'tap','Tap the linking verb.',['The music','sounds','beautiful','tonight.'],1,'Sounds links the music to beautiful.'],
+ [10,'tap','Tap the predicate nominative.',['My aunt','is','a pilot.'],2,'A pilot renames my aunt.'],
+ [10,'mcq','Which is NOT usually a linking verb?',['run','seem','become'],0,'Seem and become link; run is an action.'],
+ [10,'mcq','She felt the soft blanket. Felt is…',['action','linking','helping'],0,'She did something to the blanket: action.'],
+ [10,'mcq','She felt tired. Felt is…',['linking','action','helping'],0,'Tired describes her: linking.'],
+ [10,'mcq','The cookies smell sweet. “sweet” is…',['a predicate adjective','a direct object','an adverb'],0,'It describes the subject after a linking verb.'],
+ [10,'mcq','The winner was Sara. “Sara” is…',['a predicate nominative','a direct object','an adjective'],0,'Sara renames the winner.'],
+ [10,'mcq','The most common linking verb is a form of…',['be','run','eat'],0,'Am, is, are, was, were…'],
+ [10,'fix','Which uses “look” as a linking verb?',['You look happy today.','Look at the board.','She looked for her keys.'],0,'Happy describes you.'],
+ [10,'tf','A predicate adjective describes the subject.',['True','False'],0,'The soup (subject) tastes salty (describes it).'],
+ [10,'tf','A linking verb is followed by a direct object.',['True','False'],1,'It is followed by a complement, not an object.'],
+ // 11 · Verb phrases
+ [11,'tap','Tap the main verb.',['We','have','been','practising','all week.'],3,'Have and been are helpers; practising is the main verb.'],
+ [11,'tap','Tap the helping verb.',['Sara','will','sing','tonight.'],1,'Will helps the main verb sing.'],
+ [11,'mcq','They could have won. The verb words are…',['could have won','They could','have won the'],0,'Two helpers + the main verb.'],
+ [11,'mcq','Which is a helping verb?',['might','happily','table'],0,'Might helps a main verb.'],
+ [11,'mcq','Does he like pizza? The verb words are…',['Does like','he like','Does he'],0,'The question splits the verb team: Does … like.'],
+ [11,'mcq','Which expresses possibility?',['might','must','will'],0,'Might = maybe.'],
+ [11,'mcq','How many helping verbs? “The test will have been marked by noon.”',['3','2','1'],0,'Will, have, been.'],
+ [11,'blank','You ___ wear a helmet. (It’s the rule.)',['must','might','could'],0,'Must shows obligation.'],
+ [11,'tf','In this handbook, “not” is part of the verb phrase.',['True','False'],1,'Leave out not and adverbs.'],
+ [11,'tf','An adverb can split a verb phrase, as in “She has always loved art.”',['True','False'],0,'Has … loved, with always in between.'],
+ // 12 · Progressive forms
+ [12,'tap','Tap the helping verb.',['The children','are','building','a fort.'],1,'Are + building = present progressive.'],
+ [12,'blank','They ___ playing football when it started to rain.',['were','are','will be'],0,'An action in progress in the past: were + -ing.'],
+ [12,'blank','This time tomorrow, I ___ flying to Cairo.',['will be','was','am been'],0,'Future in progress: will be + -ing.'],
+ [12,'blank','Listen! The birds ___ singing.',['are','is','was'],0,'Plural subject, happening now: are.'],
+ [12,'mcq','Choose the -ing spelling of swim.',['swimming','swiming','swimeing'],0,'Short vowel + one consonant: double it.'],
+ [12,'mcq','Choose the -ing spelling of lie.',['lying','lieing','liing'],0,'ie changes to y: lying.'],
+ [12,'mcq','Choose the -ing spelling of make.',['making','makeing','makking'],0,'Drop the silent e.'],
+ [12,'mcq','I was reading when you called.',['Past progressive','Present progressive','Future progressive'],0,'Was + -ing.'],
+ [12,'mcq','We are meeting Grandma on Friday. This shows…',['an arranged future plan','a past action','a finished action'],0,'Present progressive can show a planned future.'],
+ [12,'fix','Choose the natural sentence. (“like” is a state verb.)',['I like chocolate.','I am liking chocolate always.','I liking chocolate.'],0,'States normally use the simple form.'],
+ [12,'tf','The past progressive uses was/were + -ing.',['True','False'],0,'“They were waiting.”'],
+];
+
+// 3) TYPE-IT bank (mini keyboard): [lesson, prompt, "answer|other accepted answer|…"]
+const TYPE_BANK = [
+ [1,'Mia sang, ___ Leo danced. (contrast)','but'],
+ [1,'I was hungry, ___ I ate a sandwich. (result)','so'],
+ [1,'Type the verb: The puppy barked loudly.','barked'],
+ [1,'Type the subject: The small birds sang.','the small birds|small birds|birds'],
+ [1,'Simple or compound? We laughed, and we cried.','compound'],
+ [1,'Simple or compound? Tom and Jerry ran home.','simple'],
+ [1,'How many independent clauses? I ran, and she walked.','two|2'],
+ [2,'We can stay, ___ we can go. (choice)','or'],
+ [2,'Type the FANBOYS word that means “because”.','for'],
+ [2,'Neither the cat ___ the dog was hungry.','nor'],
+ [2,'She is not only clever ___ also kind.','but'],
+ [2,'Both Sara ___ Lina came to the party.','and'],
+ [2,'She was tired, ___ she kept running. (surprise)','yet'],
+ [3,'Type the subordinating conjunction: We stayed in because it rained.','because'],
+ [3,'___ you study, you will pass. (condition)','if'],
+ [3,'Wait here ___ I come back. (endpoint)','until|till'],
+ [3,'___ it was cold, we swam. (contrast)','although|though|even though'],
+ [3,'I smiled ___ I saw her. (time)','when|as'],
+ [3,'Simple, compound or complex? Because I was late, I ran.','complex'],
+ [4,'Fragment or run-on? Under the bed.','fragment'],
+ [4,'Fragment or run-on? I ran I fell.','run on|runon|run-on'],
+ [4,'Complete or fragment? Stop!','complete'],
+ [4,'Comma splice or correct? It rained, we stayed in.','comma splice'],
+ [4,'What is missing — subject or verb? “Ran to the shop.”','subject'],
+ [4,'What is missing — subject or verb? “The tall boy in the hall.”','verb'],
+ [5,'Type the appositive: Leo, my cousin, is ten.','my cousin'],
+ [5,'Type the appositive: I met Sara, the new girl.','the new girl'],
+ [5,'Type the appositive: My cat, a lazy tabby, sleeps all day.','a lazy tabby'],
+ [5,'Type the appositive: Mars, the red planet, is far away.','the red planet'],
+ [5,'An appositive is a noun or a verb?','noun|a noun'],
+ [6,'Type the direct object: Mia kicked the ball.','the ball|ball'],
+ [6,'Type the action verb: The chef chopped the onions.','chopped'],
+ [6,'Type the indirect object: Dad gave me a gift.','me'],
+ [6,'Type the direct object: They praised him.','him'],
+ [6,'Type the direct object: Sara painted a picture.','a picture|picture'],
+ [6,'Direct object or none? The baby slept.','none'],
+ [7,'Type the adjective: The fluffy kitten slept.','fluffy'],
+ [7,'Type the predicate adjective: The soup is hot.','hot'],
+ [7,'Type the proper adjective: We ate Italian food.','italian'],
+ [7,'Type a stronger word for “very big”.','huge|enormous|giant|gigantic|massive|immense|vast'],
+ [7,'Type a stronger word for “very cold”.','freezing|icy|frozen|frosty'],
+ [7,'Type a stronger word for “very tired”.','exhausted|worn out|drained'],
+ [7,'Which word tells how many? Seven birds sang.','seven'],
+ [8,'The girl ___ won is my friend.','who|that'],
+ [8,'The boy ___ bag is red is here.','whose'],
+ [8,'This is the house ___ I live.','where'],
+ [8,'I remember the day ___ we met.','when|that'],
+ [8,'Tell me the reason ___ you cried.','why|that'],
+ [8,'My bike, ___ is blue, is outside.','which'],
+ [9,'Direct or reported? Sam said that he was cold.','reported'],
+ [9,'Direct or reported? “I’m cold,” said Sam.','direct'],
+ [9,'She said, “I am tired.” → She said that she ___ tired.','was'],
+ [9,'He said, “I will come.” → He said that he ___ come.','would'],
+ [9,'Ali said, “I like it.” → Ali said that ___ liked it.','he'],
+ [9,'Type the speaker: “Hurry up!” shouted Mia.','mia'],
+ [10,'Type the linking verb: The soup smells good.','smells'],
+ [10,'Type the predicate adjective: The sky looks dark.','dark'],
+ [10,'Type the predicate nominative: Mia became captain.','captain'],
+ [10,'Action or linking? She tasted the cake.','action'],
+ [10,'Action or linking? The cake tasted sweet.','linking'],
+ [10,'Type the linking verb: My aunt is a pilot.','is'],
+ [11,'Type the main verb: She has been reading.','reading'],
+ [11,'Type the helping verb: Sara will sing tonight.','will'],
+ [11,'Type the main verb: We should have left.','left'],
+ [11,'Type the main verb: Have you ever been there?','been'],
+ [11,'Type the helping verb: Can you swim?','can'],
+ [11,'You ___ stop at a red light. (obligation)','must|should'],
+ [12,'Type the -ing form of swim.','swimming'],
+ [12,'Type the -ing form of write.','writing'],
+ [12,'Type the -ing form of run.','running'],
+ [12,'Type the -ing form of lie.','lying'],
+ [12,'Type the -ing form of sit.','sitting'],
+ [12,'I ___ reading right now.','am'],
+ [12,'They ___ playing when it started to rain.','were'],
+ [12,'At 5 tomorrow, I will ___ flying to Cairo.','be'],
+];
+
+// 4) MATCH bank: [lesson, prompt, [[left, right], …]]  (4–6 pairs; each game shows 3, rights must differ)
+const MATCH_BANK = [
+ [1,'Match each sentence to its type.',[['Mia ran and jumped.','Simple'],['Mia ran, and Leo jumped.','Compound'],['Because Mia ran.','Fragment'],['Mia ran Leo jumped.','Run-on']]],
+ [1,'Match each sentence to how it is joined.',[['I won, so I smiled.','comma + FANBOYS'],['I won; I smiled.','semicolon'],['I won and smiled.','shared subject'],['I won, I smiled.','comma splice ✗']]],
+ [2,'Match each FANBOYS word to its job.',[['for','reason'],['and','addition'],['but','contrast'],['or','choice'],['so','result'],['yet','surprise'],['nor','negative addition']]],
+ [2,'Match the conjunction pairs.',[['both','and'],['either','or'],['neither','nor'],['not only','but also']]],
+ [3,'Match each word to what it shows.',[['because','reason'],['although','contrast'],['if','condition'],['when','time'],['until','endpoint']]],
+ [3,'Match each sentence to its type.',[['I ran.','Simple'],['I ran, and I won.','Compound'],['Because I ran, I won.','Complex'],['Because I ran.','Fragment']]],
+ [4,'Match each sentence to its problem.',[['Under the table.','fragment'],['It rained we stayed in.','fused run-on'],['It rained, we stayed in.','comma splice'],['It rained, so we stayed in.','correct ✓']]],
+ [4,'Match each fix to its example.',[['full stop','I ran. I won.'],['semicolon','I ran; I won.'],['comma + FANBOYS','I ran, and I won.'],['make one dependent','Because I ran, I won.']]],
+ [5,'Match each noun to its appositive.',[['Cairo','the capital of Egypt'],['Mars','the red planet'],['Mrs Amal','our science teacher'],['Rex','my clever dog'],['Messi','a football star']]],
+ [5,'Match each term to its meaning.',[['appositive','renames a noun'],['extra information','needs commas'],['needed information','no commas'],['relative clause','starts with who/which']]],
+ [6,'Match each sentence to its direct object.',[['Mia kicked the ball.','the ball'],['Leo ate an apple.','an apple'],['We built a fort.','a fort'],['She hugged her mum.','her mum'],['They painted the fence.','the fence']]],
+ [6,'“Dad gave me a book.” Match each part to its job.',[['Dad','subject'],['gave','action verb'],['me','indirect object'],['a book','direct object']]],
+ [7,'Match each adjective to what it tells.',[['seven','how many'],['those','which ones'],['wooden','material'],['huge','size'],['Italian','origin']]],
+ [7,'Match each weak phrase to a precise word.',[['very big','enormous'],['very cold','freezing'],['very tired','exhausted'],['very happy','delighted'],['very hungry','starving']]],
+ [8,'Match each relative word to its job.',[['who','a person'],['whose','possession'],['which','a thing'],['where','a place'],['when','a time'],['why','a reason']]],
+ [8,'Match each sentence to its missing word.',[['The girl ___ sings','who'],['The day ___ we met','when'],['The town ___ I live','where'],['The boy ___ bag fell','whose']]],
+ [9,'Sara said, “…” → Sara said that… Match them.',[['“I am tired.”','she was tired'],['“I will go.”','she would go'],['“I can swim.”','she could swim'],['“I like tea.”','she liked tea']]],
+ [9,'Match the time words in reported speech.',[['today','that day'],['tomorrow','the next day'],['yesterday','the day before'],['now','then'],['here','there']]],
+ [10,'Match each sentence to its complement.',[['The soup tastes salty.','salty'],['Mia became captain.','captain'],['The sky looks dark.','dark'],['Leo is a doctor.','a doctor']]],
+ [10,'Match each term to its meaning.',[['predicate adjective','describes the subject'],['predicate nominative','renames the subject'],['linking verb','connects subject + complement'],['direct object','receives the action']]],
+ [11,'Match each sentence to its verb words.',[['She has been reading.','has been reading'],['We should have left.','should have left'],['They might win.','might win'],['Can you swim?','can swim'],['He is not coming.','is coming']]],
+ [11,'Match each helper to its meaning.',[['must','obligation'],['might','possibility'],['can','ability'],['will','future']]],
+ [12,'Match each sentence to its tense.',[['She is reading.','present progressive'],['She was reading.','past progressive'],['She will be reading.','future progressive'],['She reads.','simple present']]],
+ [12,'Match each verb to its -ing form.',[['swim','swimming'],['write','writing'],['lie','lying'],['run','running'],['make','making'],['sit','sitting']]],
+];
+
+// 5) BUILD-IT bank (tap the pieces in order): [lesson, prompt, [pieces in the correct order]]
+const ORDER_BANK = [
+ [1,'Build a compound sentence.',['I was tired,','so','I went','to bed.']],
+ [1,'Build a compound sentence with a semicolon.',['The rain','stopped;','we went','outside.']],
+ [1,'Build a simple sentence.',['Mia','packed','and','left','early.']],
+ [2,'Build the sentence.',['I wanted','to stay,','but','I had','to go.']],
+ [2,'Build the sentence.',['Either','you help me,','or','you leave.']],
+ [2,'Build the sentence.',['She is','both','kind','and','clever.']],
+ [3,'Build a complex sentence.',['Because','it was raining,','we','stayed inside.']],
+ [3,'Build a complex sentence.',['If','you finish early,','you','may leave.']],
+ [3,'Build a complex sentence.',['We waited','until','the bus','arrived.']],
+ [4,'Fix the run-on: build it correctly.',['The movie ended,','and','everyone','clapped.']],
+ [4,'Fix the comma splice: build it correctly.',['I love art;','it makes','me','happy.']],
+ [4,'Fix the fragment: build a full sentence.',['Because','we missed the bus,','we','were late.']],
+ [5,'Build a sentence with an appositive.',['Leo,','our captain,','scored','a goal.']],
+ [5,'Build a sentence with an appositive.',['Cairo,','the capital of Egypt,','is','very busy.']],
+ [5,'Build a sentence with an appositive.',['I met','Sara,','the new student.']],
+ [6,'Build the sentence.',['Dad','gave','me','a new book.']],
+ [6,'Build the sentence.',['The chef','prepared','a hot','meal.']],
+ [6,'Build the sentence.',['Grandma','told','us','a funny story.']],
+ [7,'Put the adjectives in order.',['an','old','brown','leather','bag']],
+ [7,'Put the adjectives in order.',['a','lovely','small','round','table']],
+ [7,'Put the adjectives in order.',['two','beautiful','red','roses']],
+ [7,'Put the adjectives in order.',['a','big','new','wooden','box']],
+ [8,'Build the sentence.',['The girl','who','won','is','my friend.']],
+ [8,'Build the sentence.',['This is','the park','where','we play.']],
+ [8,'Build the sentence.',['The boy','whose','bag','is missing','cried.']],
+ [9,'Build the quotation.',['Leo said,','“I am','ready.”']],
+ [9,'Build the quotation.',['“Are you','coming?”','asked','Dad.']],
+ [9,'Build the quotation.',['“If it rains,”','she said,','“we will wait.”']],
+ [10,'Build the sentence.',['The soup','tastes','very','salty.']],
+ [10,'Build the sentence.',['Mia','became','the team','captain.']],
+ [10,'Build the sentence.',['The flowers','smell','wonderful.']],
+ [11,'Build the sentence.',['She','has','been','reading','all day.']],
+ [11,'Build the question.',['Have','you','ever','been','there?']],
+ [11,'Build the sentence.',['We','should','have','left','earlier.']],
+ [12,'Build the sentence.',['They','were','playing','football.']],
+ [12,'Build the sentence.',['I','will be','travelling','at noon.']],
+ [12,'Build the sentence.',['Listen!','The birds','are','singing.']],
+];
+
+/* ---------- styles the teacher can switch on/off ---------- */
+const STYLES = {
+  choose:{label:'Choose the answer',icon:'🎀',types:['mcq','blank','fix'],w:3},
+  tf:{label:'True or false',icon:'💗',types:['tf'],w:1},
+  tap:{label:'Tap the word',icon:'👆',types:['tap'],w:1.2},
+  type:{label:'Type it (keyboard)',icon:'⌨️',types:['type'],w:2},
+  match:{label:'Match it',icon:'🔗',types:['match'],w:1.2},
+  order:{label:'Build the sentence',icon:'🧩',types:['order'],w:1.4},
+};
+const TLABEL = {mcq:'Choose',blank:'Fill the blank',fix:'Fix it!',tf:'True or false',tap:'Tap the word',type:'Type it',match:'Match it',order:'Build it'};
+const PTS = {mcq:1,blank:1,fix:1,tf:1,tap:1,type:2,match:2,order:2};
+
+const BANK = [].concat(
+  ORIGINAL,
+  EXTRA.map((x,i)=>({id:'x'+i,l:x[0],t:x[1],q:x[2],o:x[3],a:x[4],why:x[5]})),
+  TYPE_BANK.map((x,i)=>({id:'k'+i,l:x[0],t:'type',q:x[1],ans:x[2].split('|')})),
+  MATCH_BANK.map((x,i)=>({id:'m'+i,l:x[0],t:'match',q:x[1],pairs:x[2]})),
+  ORDER_BANK.map((x,i)=>({id:'b'+i,l:x[0],t:'order',q:x[1],tiles:x[2]})),
+);
+const styleOf = q => Object.keys(STYLES).find(k=>STYLES[k].types.includes(q.t));
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const initials=n=>{const w=n.split(' ');return (w[0][0]+(w[1]?w[1][0]:'')).toUpperCase();};
+const norm=s=>String(s).toLowerCase().replace(/[‘’`]/g,"'").replace(/[^a-z' ]/g,' ').replace(/\s+/g,' ').trim();
+const lessonOf=id=>LESSONS.find(l=>l.id===id);
+
+/* ---------- state (each class keeps its own tournament) ---------- */
+const LIST_ID='LIST';
+let CLS=null,STUDENTS=[];
+const key=c=>'gqc-race-'+(c||CLS);
+const DEF=()=>({absent:[],totalMin:40,changeSec:20,mode:'auto',fixedSec:120,freeze:1.5,more:false,
+  lessons:LESSONS.map(l=>l.id),styles:Object.keys(STYLES),bracket:null,endAt:null,stats:{},log:[],used:[],list:''});
+let S=DEF();
+function peek(c){try{return JSON.parse(localStorage.getItem(key(c)))||null;}catch(e){return null;}}
+function load(){S=Object.assign(DEF(),peek(CLS)||{});}
+function save(){if(!CLS)return;try{localStorage.setItem(key(),JSON.stringify(S));}catch(e){}}
+function classStudents(c){
+  if(c===LIST_ID) return parseList(S.list);
+  const cl=CLASSES.find(x=>x.id===c); return cl?cl.students.map(s=>s.short):[];
+}
+function parseList(txt){
+  const rows=String(txt||'').split(/\r?\n/).map(l=>l.split('\t').map(c=>c.trim())).filter(r=>r.some(Boolean));
+  if(!rows.length) return [];
+  const n=Math.max(...rows.map(r=>r.length));let best=0,bs=-1;
+  for(let c=0;c<n;c++){const s=rows.reduce((a,r)=>a+((r[c]||'').match(/[A-Za-z؀-ۿ]/g)||[]).length,0);if(s>bs){bs=s;best=c;}}
+  const seen=new Set(),out=[];
+  rows.forEach(r=>{let v=(r[best]||'').replace(/\s+/g,' ').trim();if(!v||/^(names?|student'?s? ?names?|full names?|الاسم|اسم)$/i.test(v))return;
+    v=v.split(' ').slice(0,2).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');if(seen.has(v.toLowerCase()))return;seen.add(v.toLowerCase());out.push(v);});
+  return out;
+}
+
+/* ---------- stage ---------- */
+const stage=$('#stage');let SCALE=1;
+function fit(){SCALE=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform=`scale(${SCALE})`;stage.style.left=(innerWidth-1920*SCALE)/2+'px';stage.style.top=(innerHeight-1080*SCALE)/2+'px';}
+addEventListener('resize',fit);fit();
+function show(id){$$('.scr').forEach(s=>s.classList.toggle('on',s.id===id));}
+
+/* ---------- sound ---------- */
+let AC=null,MUTE=false;
+function tone(f,d=.15,type='sine',v=.16,delay=0){if(MUTE)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02);}catch(e){}}
+const SFX={ok(){tone(660,.12,'triangle');tone(990,.2,'triangle',.16,.09);},bad(){tone(300,.15,'triangle',.1);tone(200,.28,'triangle',.1,.1);},tick(){tone(880,.06,'square',.05);},tap(){tone(720,.05,'triangle',.07);},
+  go(){tone(523,.15);tone(659,.15,'sine',.16,.12);tone(784,.3,'sine',.18,.24);},end(){[523,659,784,1046].forEach((f,i)=>tone(f,.35,'triangle',.16,i*.13));},horn(){[392,523,659].forEach((f,i)=>tone(f,.3,'triangle',.13,i*.12));}};
+
+/* ---------- confetti ---------- */
+const fx=$('#fx'),fctx=fx.getContext('2d');let parts=[],fxOn=false;
+function confetti(n=220,x=960){const cols=['#ff4f9a','#ffb3d4','#8f5cf7','#d9c6ff','#ffd166','#7fe0c0','#fff'],em=['💖','✨','🌸','🎀'];
+  for(let i=0;i<n;i++)parts.push({x:x+(Math.random()-.5)*700,y:-20-Math.random()*300,vx:(Math.random()-.5)*9,vy:Math.random()*4+2,r:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,s:Math.random()*12+8,c:cols[i%cols.length],e:Math.random()<.15?pick(em):null,life:320});
+  if(!fxOn){fxOn=true;requestAnimationFrame(fxLoop);}}
+function fxLoop(){fctx.clearRect(0,0,1920,1080);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;p.r+=p.vr;p.life--;fctx.save();fctx.translate(p.x,p.y);fctx.rotate(p.r);
+  if(p.e){fctx.font=(p.s*2.4)+'px serif';fctx.fillText(p.e,0,0);}else{fctx.fillStyle=p.c;fctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);}fctx.restore();});
+  parts=parts.filter(p=>p.life>0&&p.y<1150);if(parts.length)requestAnimationFrame(fxLoop);else{fxOn=false;fctx.clearRect(0,0,1920,1080);}}
+
+/* ---------- modal ---------- */
+function ask(msg,yes='Yes',no='Cancel',input){return new Promise(r=>{const m=$('#modal');
+  m.querySelector('.box').innerHTML=`<p>${msg}</p>${input!=null?`<input id="mIn" type="number" value="${input}">`:''}<div class="row" style="justify-content:center">${no?`<button class="btn g" data-v="0">${no}</button>`:''}<button class="btn" data-v="1">${yes}</button></div>`;
+  m.classList.add('on');$$('[data-v]',m).forEach(b=>b.onclick=()=>{const v=$('#mIn')?$('#mIn').value:null;m.classList.remove('on');r(b.dataset.v==='1'?(input!=null?v:true):false);});});}
+
+/* =====================================================================
+   BRACKET & TIME
+   ===================================================================== */
+const present=()=>STUDENTS.filter(s=>!S.absent.includes(s));
+function makeBracket(){const ps=shuffle(present()),n=ps.length;if(n<2)return null;const size=2**Math.ceil(Math.log2(n)),half=size/2;
+  const pairs=[];for(let i=0;i<half;i++)pairs.push({a:ps[i],b:null});for(let i=half;i<n;i++)pairs[i-half].b=ps[i];
+  const r0=shuffle(pairs).map(p=>Math.random()<.5&&p.b?{a:p.b,b:p.a}:p);const rounds=[r0.map((p,i)=>({id:'0-'+i,a:p.a,b:p.b,bye:!p.b,w:p.b?null:p.a,sa:0,sb:0}))];
+  for(let r=1,m=half/2;m>=1;r++,m/=2){rounds.push(Array.from({length:m},(_,i)=>({id:r+'-'+i,a:null,b:null,w:null,sa:0,sb:0})));}
+  return {rounds};}
+function propagate(){const R=S.bracket.rounds;for(let r=1;r<R.length;r++)R[r].forEach((m,i)=>{const a=R[r-1][2*i].w,b=R[r-1][2*i+1].w;if(m.a!==a||m.b!==b){m.a=a;m.b=b;m.w=null;m.sa=m.sb=0;}});}
+function roundName(r,R){const f=R-1-r;return f===0?'THE FINAL':f===1?'SEMI-FINAL':f===2?'QUARTER-FINAL':`ROUND OF ${2**(R-r)}`;}
+const realMatches=()=>S.bracket?S.bracket.rounds.flat().filter(m=>!m.bye):[];
+const remaining=()=>realMatches().filter(m=>!m.w);
+const weight=m=>{const R=S.bracket.rounds.length,r=+m.id.split('-')[0],f=R-1-r;return f===0?1.6:f===1?1.25:1;};
+function timeLeftSec(){return S.endAt?(S.endAt-Date.now())/1000:S.totalMin*60;}
+function plannedDur(m){if(S.mode==='fixed')return S.fixedSec;const rem=remaining();if(!rem.length)return 60;const ws=rem.reduce((s,x)=>s+weight(x),0);const base=(timeLeftSec()-S.changeSec*rem.length)/ws;return Math.max(30,Math.min(300,Math.round(base*weight(m)/5)*5));}
+function nextReady(){return realMatches().find(m=>!m.w&&m.a&&m.b);}
+function findMatch(id){return S.bracket.rounds.flat().find(m=>m.id===id);}
+function poolNow(){return BANK.filter(q=>S.lessons.includes(q.l)&&S.styles.includes(styleOf(q)));}
+
+/* =====================================================================
+   SCREENS
+   ===================================================================== */
+function floaties(){const F=['FANBOYS','who · whom · whose','“Ready?” she asked.','am / is / are + -ing','Leo, our captain, scored.','Although it rained…','an old brown leather bag','I ran; I won.','💖','Mia became captain.'];
+  return F.map((t,i)=>`<div class="floaty" style="top:${40+i*104}px;animation-duration:${28+i*4}s;animation-delay:-${i*6}s">${t}</div>`).join('');}
+function status(c){const v=peek(c);if(!v||!v.bracket)return {t:'No tournament yet',c:'#b9a3b4'};const R=v.bracket.rounds,f=R[R.length-1][0];if(f.w)return {t:'👑 '+f.w,c:'#e0a92e'};const left=R.flat().filter(m=>!m.bye&&!m.w).length;return {t:'▶ '+left+' matches left',c:'#1fbf86'};}
+function renderHome(){
+  const ids=CLASSES.map(c=>c.id).concat(LIST_ID);
+  $('#home').innerHTML=`${floaties()}
+  <div class="center" style="gap:22px"><div style="font-size:28px;font-weight:700;letter-spacing:8px;color:var(--lav)">GRADE 6 · GRAMMAR RACE</div>
+  <h1 class="title">Grammar Queen Cup</h1>
+  <div style="font-size:30px;color:var(--muted);font-weight:500">👇 Tap your class to start</div>
+  <div class="row" style="gap:24px">${ids.map(c=>{const st=status(c),n=c===LIST_ID?parseList((peek(c)||{}).list).length:CLASSES.find(x=>x.id===c).students.length;
+    return `<button class="clsc" data-c="${c}"><div class="cn">${c===LIST_ID?'📋':c}</div><div style="font-size:24px;color:var(--muted)">${c===LIST_ID?(n?n+' pasted names':'Paste your own list'):n+' students'}</div><div style="font-size:21px;font-weight:700;color:${st.c};margin-top:8px;min-height:28px">${esc(st.t)}</div></button>`;}).join('')}</div>
+  <div class="row" style="gap:20px;margin-top:8px"><button class="btn g s" id="hDemo">🎮 Practice match (show the rules)</button></div>
+  <div style="font-size:20px;color:#b9a3b4">Press F for full screen · each class keeps its own bracket, saved automatically</div></div>
+  <button id="mute" class="btn g s" style="position:absolute;right:30px;bottom:30px">${MUTE?'🔇':'🔊'}</button>`;
+  $$('.clsc').forEach(b=>b.onclick=()=>selectClass(b.dataset.c));$('#hDemo').onclick=demoMatch;
+  $('#mute').onclick=()=>{MUTE=!MUTE;renderHome();};show('home');}
+function selectClass(c){CLS=c;load();STUDENTS=classStudents(c);
+  if(!S.bracket)return goSetup();const R=S.bracket.rounds;if(R[R.length-1][0].w)return goChamp();goBracket();}
+
+function goSetup(){const R=$('#setup');
+  const draw=()=>{STUDENTS=classStudents(CLS);const n=present().length,matches=Math.max(0,n-1),pool=poolNow().length;
+    let preview='';if(n>=2){const R2=Math.ceil(Math.log2(n));const wsum=Math.max(0,matches-3)+2*1.25+1.6;const base=(S.totalMin*60-S.changeSec*matches)/Math.max(1,wsum);
+      preview=S.mode==='fixed'?`${matches} matches × ${mmss(S.fixedSec)} + change-overs ≈ <b>${Math.round((matches*(S.fixedSec+S.changeSec))/60)} min</b>`:
+      (base<30?`<span style="color:#e0304f">⚠ Too little time: matches would be under 30 s. Add minutes or mark fewer girls present.</span>`:`${matches} matches in ${R2} rounds → ≈ <b>${mmss(Math.round(base/5)*5)}</b> per match, semi-finals ≈ <b>${mmss(Math.round(base*1.25/5)*5)}</b>, final ≈ <b>${mmss(Math.round(base*1.6/5)*5)}</b>`);}
+    const isList=CLS===LIST_ID;
+    R.innerHTML=`<div class="topbar"><h2>${isList?'My list':'Grade '+CLS} · Setup</h2><div class="sp"></div>${S.bracket?`<button class="btn g s" id="sBk">👑 Back to bracket</button>`:''}<button class="btn g s" id="sHome">⌂ Classes</button></div>
+    <div style="position:absolute;left:30px;top:110px;width:1060px;bottom:24px;overflow:hidden" class="panel"><div style="padding:24px 28px">
+      ${isList?`<div class="lab" style="margin-bottom:10px">① Paste the names from Excel <small>(one per row — extra columns are fine)</small></div>
+        <textarea class="paste" id="lst" placeholder="Copy the names column in Excel, click here and paste (Ctrl+V / ⌘V)">${esc(S.list)}</textarea>
+        <div class="row" style="margin:12px 0 14px"><button class="btn s" id="useL">✓ Use these names</button><span class="note">${STUDENTS.length} names found</span></div>`:''}
+      <div class="row" style="margin-bottom:16px"><span class="lab">${isList?'②':'①'} Who is playing today? &nbsp;<span style="color:var(--rose)">${n} playing</span> <small>· tap a name to take her out</small></span><div class="sp"></div>
+        <button class="btn g s" id="allIn">Everyone</button><button class="btn g s" id="rnd">🎲 Pick some</button></div>
+      <div class="chipgrid">${STUDENTS.map(s=>`<button class="chip ${S.absent.includes(s)?'off':''}" data-n="${esc(s)}"><span class="ck">${S.absent.includes(s)?'✕':'♥'}</span><span>${esc(s)}</span></button>`).join('')}</div></div></div>
+    <div style="position:absolute;left:1110px;right:30px;top:110px;bottom:24px;padding:20px 26px;display:flex;flex-direction:column;gap:14px" class="panel">
+      ${!S.more?`<div class="lab">⏱ How long for the WHOLE tournament?</div>
+      <div class="row" style="justify-content:center"><button class="pm" data-k="totalMin" data-d="-5">−</button><span class="big" style="font-size:60px;min-width:250px">${S.totalMin} min</span><button class="pm" data-k="totalMin" data-d="5">+</button></div>
+      <div class="note" style="background:#fff6e0;border-radius:16px;padding:12px 18px;font-size:21px">${preview||'Choose at least 2 girls.'}</div>
+      <div class="lab">📚 Lessons in the tournament <small>${S.lessons.length} chosen · <button id="lAll" style="background:none;color:var(--rose);font-weight:700;font-size:20px">all</button></small></div>
+      <div class="lgrid">${LESSONS.map(l=>`<button class="ltog ${S.lessons.includes(l.id)?'on':''}" style="--c:${l.c}" data-l="${l.id}"><span class="em">${l.em}</span><span>${l.id}. ${esc(l.title)}</span></button>`).join('')}</div>
+      <div class="lab">✨ Question styles</div>
+      <div class="row" style="flex-wrap:wrap;gap:10px">${Object.entries(STYLES).map(([k,s])=>`<button class="stog ${S.styles.includes(k)?'on':''}" data-s="${k}">${s.icon} ${s.label}</button>`).join('')}</div>
+      <div class="note" style="font-size:19px">${pool} questions ready · each girl gets her own questions · Type / Match / Build = 2 points</div>`
+      :`<div class="lab">More options</div>
+      <div class="row"><div class="seg"><button data-m="auto" class="${S.mode==='auto'?'on':''}">Fit to total time</button><button data-m="fixed" class="${S.mode==='fixed'?'on':''}">Fixed match length</button></div></div>
+      ${S.mode==='fixed'?`<div class="row"><button class="pm" data-k="fixedSec" data-d="-15">−</button><span class="big">${mmss(S.fixedSec)}</span><button class="pm" data-k="fixedSec" data-d="15">+</button><span class="note">every match</span></div>`:''}
+      <div class="row"><button class="pm" data-k="changeSec" data-d="-5">−</button><span class="big" style="font-size:34px">${S.changeSec} s</span><button class="pm" data-k="changeSec" data-d="5">+</button><span class="note">change-over between matches</span></div>
+      <div class="row"><span class="lab" style="font-size:22px">Wrong answer freeze</span><div class="seg">${[1,1.5,2,3].map(v=>`<button data-f="${v}" class="${S.freeze===v?'on':''}">${v} s</button>`).join('')}</div></div>
+      <div class="note">Question banks: ${Object.entries(STYLES).map(([k,s])=>`${s.icon} ${BANK.filter(q=>styleOf(q)===k).length}`).join(' · ')}</div>`}
+      <div class="sp"></div><button class="btn g s" id="more" style="align-self:center">${S.more?'◀ Back to simple setup':'More options ▸'}</button>
+      <button class="btn" id="mk" style="font-size:34px;padding:18px 30px" ${n<2||!pool?'disabled':''}>🎲 Draw the bracket ▶</button></div>`;
+    $('#more').onclick=()=>{S.more=!S.more;save();draw();};if($('#sBk'))$('#sBk').onclick=()=>goBracket();
+    $('#sHome').onclick=renderHome;$('#allIn').onclick=()=>{S.absent=[];save();draw();};
+    $('#rnd').onclick=async()=>{const v=await ask(`How many girls should play? (2–${STUDENTS.length})`,'Pick them 🎲','Cancel',Math.min(8,STUDENTS.length));const k=parseInt(v,10);if(!k)return;
+      const keep=new Set(shuffle(STUDENTS).slice(0,Math.max(2,Math.min(k,STUDENTS.length))));S.absent=STUDENTS.filter(s=>!keep.has(s));save();draw();};
+    if($('#useL')){const use=()=>{S.list=$('#lst').value;S.absent=[];save();draw();};$('#useL').onclick=use;$('#lst').addEventListener('paste',()=>setTimeout(use,50));}
+    $$('.chip',R).forEach(c=>c.onclick=()=>{const s=c.dataset.n;S.absent=S.absent.includes(s)?S.absent.filter(x=>x!==s):[...S.absent,s];save();draw();});
+    $$('[data-l]',R).forEach(b=>b.onclick=()=>{const id=+b.dataset.l;S.lessons=S.lessons.includes(id)?S.lessons.filter(x=>x!==id):[...S.lessons,id].sort((a,b)=>a-b);if(!S.lessons.length)S.lessons=[id];save();draw();});
+    if($('#lAll'))$('#lAll').onclick=()=>{S.lessons=LESSONS.map(l=>l.id);save();draw();};
+    $$('[data-s]',R).forEach(b=>b.onclick=()=>{const k=b.dataset.s;S.styles=S.styles.includes(k)?S.styles.filter(x=>x!==k):[...S.styles,k];if(!S.styles.length)S.styles=[k];save();draw();});
+    $$('[data-m]',R).forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;save();draw();});
+    $$('.pm',R).forEach(b=>b.onclick=()=>{const k=b.dataset.k,lim={totalMin:[5,180],fixedSec:[30,300],changeSec:[0,90]}[k];S[k]=Math.max(lim[0],Math.min(lim[1],S[k]+ +b.dataset.d));save();draw();});
+    $$('[data-f]',R).forEach(b=>b.onclick=()=>{S.freeze=+b.dataset.f;save();draw();});
+    $('#mk').onclick=async()=>{if(S.bracket&&S.log.length&&!(await ask('A tournament is already in progress. Draw a NEW bracket and lose its results?','Yes, new bracket')))return;
+      S.bracket=makeBracket();S.endAt=null;S.stats={};S.log=[];S.used=[];save();goBracket(true);};};
+  draw();show('setup');}
+
+let bkTimer=null;
+function goBracket(fresh,view){const el=$('#bracket');const B=S.bracket;if(!B)return goSetup();propagate();save();const R=B.rounds.length;
+  const final=B.rounds[R-1][0];if(final.w&&!view)return goChamp();
+  const nx=nextReady();
+  el.innerHTML=`<div class="topbar"><h2>👑 ${CLS===LIST_ID?'My list':'Grade '+CLS}</h2><div class="timebox" id="tbx"></div><div class="sp"></div>
+    <button class="btn s" id="bPlay" style="font-size:26px;padding:14px 30px">▶ Play next match</button><button class="btn g s" id="bUndo" ${S.log.length?'':'disabled'}>↶ Undo last</button><button class="btn g s" id="bSet">⚙</button><button class="btn g s" id="bHome">⌂</button></div>
+    <div style="position:absolute;left:40px;top:116px;color:var(--muted);font-size:21px">${remaining().length} matches left · tap any glowing match to play it · free passes go straight through</div>
+    <div id="bk">${B.rounds.map((rd,r)=>`<div class="col"><h4>${roundName(r,R)}</h4><div class="ms">${rd.map(m=>{const cls=['mb'];if(m.bye)cls.push('bye');else if(!m.w&&m.a&&m.b)cls.push('ready');if(nx&&m.id===nx.id)cls.push('next');
+      const row=(p,s)=>`<div class="pl ${m.w?(m.w===p?'w':'l'):''}"><span class="nm">${p?(m.w===p?'👑 ':'')+esc(p):'…'}</span>${m.w&&!m.bye?`<span class="sc">${s}</span>`:''}</div>`;
+      if(m.bye)return `<div class="mb bye"><div class="pl" style="height:24px;font-size:16px"><span class="nm">${esc(m.a)} · free pass ✨</span></div></div>`;
+      return `<div class="${cls.join(' ')}" data-id="${m.id}">${row(m.a,m.sa)}${row(m.b,m.sb)}</div>`;}).join('')}</div></div>`).join('')}</div>`;
+  const tb=()=>{const rem=remaining(),left=timeLeftSec(),eta=new Date(Date.now()+left*1000);
+    $('#tbx').innerHTML=S.mode==='fixed'?`⏱ Fixed: <b>${mmss(S.fixedSec)}</b> per match <button class="pm" data-x="-15">−</button><button class="pm" data-x="15">+</button>`:
+      `${S.endAt?'⏱ Time left':'⏱ Planned'} <b>${Math.max(0,Math.round(left/60))} min</b> <button class="pm" data-x="-5">−</button><button class="pm" data-x="5">+</button> ${S.endAt?`ends ≈ ${eta.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} · `:''}next match <b>${rem.length?mmss(plannedDur(nx||rem[0])):'—'}</b>`;
+    $$('#tbx [data-x]').forEach(b=>b.onclick=()=>{const d=+b.dataset.x;if(S.mode==='fixed')S.fixedSec=Math.max(30,Math.min(300,S.fixedSec+d));else if(S.endAt)S.endAt=Math.max(Date.now()+60000,S.endAt+d*60000);else S.totalMin=Math.max(5,S.totalMin+d);save();tb();});};
+  tb();clearInterval(bkTimer);bkTimer=setInterval(()=>{if($('#bracket').classList.contains('on')&&!$('#tbx:hover'))tb();},5000);
+  $('#bPlay').disabled=!nx;$('#bPlay').onclick=()=>nx&&goReady(nx);
+  $$('.mb.ready',el).forEach(b=>b.onclick=()=>goReady(findMatch(b.dataset.id)));
+  $('#bHome').onclick=renderHome;$('#bSet').onclick=goSetup;
+  $('#bUndo').onclick=async()=>{const last=S.log[S.log.length-1];if(!last)return;const m=findMatch(last.id);if(!(await ask(`Undo the result <b>${esc(m.a||'')} vs ${esc(m.b||'')}</b>? It can be played again.`,'Undo')))return;
+    S.log.pop();m.w=null;m.sa=m.sb=0;(last.stats||[]).forEach(([n,c])=>{if(S.stats[n])S.stats[n].c-=c;});save();goBracket();};
+  show('bracket');if(fresh){confetti(80);SFX.go();}}
+
+function goReady(m,demo){const R=demo?1:S.bracket.rounds.length,r=demo?0:+m.id.split('-')[0];let dur=demo?60:plannedDur(m);
+  const el=$('#ready');const draw=()=>{el.innerHTML=`<div class="vs"><div class="side L"><div class="av slideL">${initials(m.a)}</div><div class="nm slideL">${esc(m.a)}</div></div><div class="side R"><div class="av slideR">${initials(m.b)}</div><div class="nm slideR">${esc(m.b)}</div></div></div>
+   <div class="vsbadge">vs</div>
+   <div style="position:absolute;top:40px;left:0;right:0;text-align:center;color:#fff"><div style="font-size:34px;font-weight:700;letter-spacing:4px">${demo?'PRACTICE MATCH':roundName(r,R)}</div>
+     <div class="row" style="justify-content:center;margin-top:10px"><button class="pm" id="dm" style="background:#fff;color:var(--rose)">−</button><span style="font-size:60px;font-weight:700;min-width:200px">${mmss(dur)}</span><button class="pm" id="dp" style="background:#fff;color:var(--rose)">+</button></div></div>
+   <div style="position:absolute;bottom:40px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:22px">
+     <div class="rules"><div>💖 Each girl answers HER OWN questions — as many as she can!</div><div>❄️ Wrong answer = ${S.freeze} s freeze, then a new question</div><div>⌨️🔗🧩 Type / Match / Build = 2 points · Tie → ⚡ sudden death</div></div>
+     <div class="row"><button class="btn g" id="rBack">◀ Back</button><button class="btn g" id="rGo" style="font-size:44px;padding:22px 70px;color:var(--rose)">START ▶</button></div></div>`;
+   $('#dm').onclick=()=>{dur=Math.max(30,dur-15);draw();};$('#dp').onclick=()=>{dur=Math.min(600,dur+15);draw();};
+   $('#rBack').onclick=()=>demo?renderHome():goBracket();$('#rGo').onclick=()=>startMatch(m,dur,demo,demo?'PRACTICE':roundName(r,R));};
+  draw();show('ready');SFX.horn();}
+function demoMatch(){const keep=S;if(!CLS)S=DEF();goReady({id:'demo',a:'Player Pink',b:'Player Purple'},true);if(!CLS)S=keep;}
+
+/* =====================================================================
+   MATCH ENGINE
+   ===================================================================== */
+let M=null,raf=null,lastT=0;
+function startMatch(m,dur,demo,label){
+  if(!CLS)S=DEF();
+  if(!demo&&!S.endAt&&S.mode==='auto'){S.endAt=Date.now()+S.totalMin*60000;save();}
+  const pool=poolNow();
+  M={m,dur,left:dur,demo,label,pool,slots:[],seen:new Set(),running:false,paused:false,sudden:false,over:false,
+     p:[0,1].map(i=>({name:i?m.b:m.a,score:0,correct:0,streak:0,k:0,q:null,wrong:0,lock:0,after:null,input:'',sel:null,matched:[],built:[],out:false}))};
+  const el=$('#match');
+  el.innerHTML=`${[0,1].map(i=>`<div class="half ${i?'R':'L'}" id="h${i}"><div class="ph"><div class="score" id="sc${i}">0</div><div class="nm">${esc(M.p[i].name)}</div><div class="streak" id="st${i}"></div></div>
+     <div class="qc" id="qc${i}"></div><div class="az" id="az${i}"></div></div>`).join('')}
+   <div id="hud"><div class="rd">${label}</div><div class="tm" id="tm">${mmss(dur)}</div><div class="ctl"><button id="cPause">❚❚ Pause</button><button id="cMinus">−30s</button><button id="cPlus">+30s</button><button id="cEnd">End now</button><button id="cExit">✕</button></div></div>
+   <div class="tug"><i id="tug">💖</i></div>`;
+  [0,1].forEach(i=>$('#h'+i).addEventListener('pointerdown',e=>{const b=e.target.closest('[data-a]');if(!b)return;e.preventDefault();b.classList.add('pr');setTimeout(()=>b.classList.remove('pr'),120);act(i,b.dataset.a,b.dataset.v);}));
+  $('#cPause').onclick=()=>{if(!M.running||M.over)return;M.paused=!M.paused;$('#cPause').textContent=M.paused?'▶ Resume':'❚❚ Pause';overlay(M.paused?'<div class="sd">PAUSED</div>':null);};
+  $('#cPlus').onclick=()=>{M.left+=30;tickUI();};$('#cMinus').onclick=()=>{M.left=Math.max(1,M.left-30);tickUI();};
+  $('#cEnd').onclick=()=>{if(M.running&&!M.sudden)M.left=0;};
+  $('#cExit').onclick=async()=>{const wasP=M.paused;M.paused=true;if(await ask('Leave this match? The result will NOT be saved.','Leave match','Keep playing')){stopMatch();M.demo?renderHome():goBracket();}else M.paused=wasP;};
+  [0,1].forEach(i=>{$('#qc'+i).innerHTML='<div class="qq" style="color:#cdb7c7">Get ready…</div>';$('#az'+i).innerHTML='';});
+  tug();show('match');countdown(()=>{M.running=true;[0,1].forEach(i=>newQ(i));loop();});}
+function overlay(html){let o=$('#mOv');if(!html){o&&o.remove();return;}if(!o){o=document.createElement('div');o.id='mOv';o.className='ovl';$('#match').appendChild(o);}o.innerHTML=html;}
+function countdown(done){let n=3;const step=()=>{if(n>0){overlay(`<div class="cd">${n}</div>`);SFX.tick();n--;setTimeout(step,850);}else{overlay('<div class="cd" style="color:#ffd166">GO!</div>');SFX.go();setTimeout(()=>{overlay(null);done();},600);}};step();}
+function loop(){lastT=performance.now();clearInterval(raf);const f=()=>{const t=performance.now();if(!M||M.over){clearInterval(raf);return;}const dt=(t-lastT)/1000;lastT=t;
+    if(M.running&&!M.paused){if(!M.sudden){const before=Math.ceil(M.left);M.left-=dt;if(Math.ceil(M.left)!==before&&M.left<=10&&M.left>0)SFX.tick();if(M.left<=0){M.left=0;timeUp();}}
+      M.p.forEach((p,i)=>{if(p.lock>0){p.lock-=dt;if(p.lock<=0){p.lock=0;$('#h'+i).classList.remove('lock');if(p.after){const a=p.after;p.after=null;a();}}}});}
+    tickUI();};raf=setInterval(f,100);}
+function tickUI(){const t=$('#tm');if(!t||!M)return;t.textContent=M.sudden?'⚡':mmss(M.left);t.classList.toggle('low',!M.sudden&&M.left<=10);}
+function stopMatch(){if(M)M.over=true;clearInterval(raf);}
+
+/* ----- choosing questions: both girls get the same STYLE in the same order, but different questions ----- */
+function slotStyle(k){
+  const avail=Object.keys(STYLES).filter(s=>M.pool.some(q=>styleOf(q)===s));
+  while(M.slots.length<=k){const prev=M.slots[M.slots.length-1];let s;let tries=0;
+    do{let r=Math.random()*avail.reduce((a,x)=>a+STYLES[x].w,0);s=avail.find(x=>(r-=STYLES[x].w)<0)||avail[0];}while(avail.length>1&&s===prev&&s!=='choose'&&++tries<10);
+    M.slots.push(s);}
+  return M.slots[k];
+}
+function drawQ(i,style){
+  const other=M.p[1-i].q;let c=M.pool.filter(q=>styleOf(q)===style);
+  const fresh=c.filter(q=>!M.seen.has(q.id)&&(!other||other.id!==q.id));
+  const unused=fresh.filter(q=>!S.used.includes(q.id));
+  const q=pick(unused.length?unused:fresh.length?fresh:c.filter(q=>!other||other.id!==q.id).length?c.filter(q=>!other||other.id!==q.id):c);
+  M.seen.add(q.id);if(!M.demo&&!S.used.includes(q.id)){S.used.push(q.id);if(S.used.length>600)S.used.shift();}
+  return prepQ(q);
+}
+function prepQ(q){
+  if(q.t==='match'){const ps=[],rs=new Set();for(const p of shuffle(q.pairs)){if(!rs.has(p[1])&&ps.length<3){ps.push(p);rs.add(p[1]);}}
+    return {...q,L:ps.map(p=>p[0]),A:ps.map(p=>p[1]),Rt:shuffle(ps.map(p=>p[1]))};}
+  if(q.t==='order'){let sh;do sh=shuffle(q.tiles.map((_,i)=>i));while(q.tiles.length>1&&sh.every((v,i)=>v===i));return {...q,sh};}
+  if(q.t==='tap'||q.t==='tf'||q.t==='type')return {...q};
+  const order=shuffle(q.o.map((_,i)=>i));return {...q,o:order.map(i=>q.o[i]),a:order.indexOf(q.a)};
+}
+function newQ(i,shared){const p=M.p[i];p.q=shared||drawQ(i,slotStyle(p.k++));p.input='';p.wrong=0;p.sel=null;p.matched=[];p.built=[];p.out=false;renderQ(i);}
+
+/* ----- drawing a question on one half ----- */
+function answerText(q){return q.t==='type'?q.ans[0]:q.t==='order'?q.tiles.join(' '):q.t==='match'?q.L.map((l,k)=>`${l} → ${q.A[k]}`).join('<br>'):q.o[q.a];}
+function fs(text,base){const n=text.replace(/<[^>]+>/g,'').length;return n<36?base:n<64?base*.85:n<100?base*.72:base*.62;}
+function renderQ(i){const p=M.p[i],q=p.q,L=lessonOf(q.l),c=$('#qc'+i),az=$('#az'+i);
+  const qhtml=esc(q.q).replace(/_{3,}/g,'<span class="blank"></span>');
+  c.innerHTML=`<div class="qt">${L.em} Lesson ${L.id} <i>${TLABEL[q.t]}${PTS[q.t]>1&&!M.sudden?' · +2':''}</i>${M.sudden?'<i>⚡ SUDDEN DEATH</i>':''}</div>${M.sudden?'':'<button class="pass" data-a="pass">Pass ⤼</button>'}
+    <div class="qq" style="font-size:${fs(q.q,46)}px">${qhtml}</div>`;
+  if(q.t==='tap'||q.t==='tf'||['mcq','blank','fix'].includes(q.t)){
+    if(q.t==='tap') az.innerHTML=`<div class="taps">${q.o.map((o,k)=>`<button class="opt" data-a="opt" data-v="${k}">${esc(o)}</button>`).join('')}</div>`;
+    else{const long=q.o.some(o=>o.length>22);az.innerHTML=`<div class="opts n${Math.min(4,q.o.length)} ${q.t==='tf'?'tf':''}">${q.o.map((o,k)=>`<button class="opt ${long?'long':''}" data-a="opt" data-v="${k}">${esc(o)}</button>`).join('')}</div>`;}
+  }else if(q.t==='type'){
+    const rows=['qwertyuiop','asdfghjkl','zxcvbnm'];
+    az.innerHTML=`<div class="tdisp empty" id="td${i}">type your answer…</div><div class="kb">${rows.map((r,ri)=>`<div class="kr">${r.split('').map(k=>`<button data-a="key" data-v="${k}">${k}</button>`).join('')}${ri===2?'<button class="fn" data-a="key" data-v="back">⌫</button>':''}</div>`).join('')}
+      <div class="kr"><button class="fn" data-a="key" data-v="-">-</button><button class="wide" data-a="key" data-v=" ">space</button><button class="ok" data-a="key" data-v="ok">✓</button></div></div>`;
+    tdisp(i);
+  }else if(q.t==='match'){
+    az.innerHTML=`<div class="mt"><div class="mcol">${q.L.map((l,k)=>`<button class="mi" data-a="ml" data-v="${k}">${esc(l)}</button>`).join('')}</div><div class="mcol">${q.Rt.map((r,k)=>`<button class="mi" data-a="mr" data-v="${k}">${esc(r)}</button>`).join('')}</div></div>`;
+    paintMatch(i);
+  }else if(q.t==='order'){ paintOrder(i); }
+}
+function tdisp(i){const d=$('#td'+i);if(!d)return;const v=M.p[i].input;d.classList.toggle('empty',!v);d.innerHTML=v?esc(v)+'<span class="cur"></span>':'type your answer…';}
+function paintMatch(i){const p=M.p[i],q=p.q,az=$('#az'+i);
+  $$('[data-a="ml"]',az).forEach(b=>{const k=+b.dataset.v,mi=p.matched.findIndex(x=>x[0]===k);b.className='mi'+(mi>=0?' done c'+mi:p.sel===k?' sel':'');});
+  $$('[data-a="mr"]',az).forEach(b=>{const k=+b.dataset.v,mi=p.matched.findIndex(x=>x[1]===k);b.className='mi'+(mi>=0?' done c'+mi:'');});}
+function paintOrder(i){const p=M.p[i],q=p.q,az=$('#az'+i);
+  az.innerHTML=`<div class="built">${p.built.map((t,k)=>`<button class="tile" data-a="untile" data-v="${k}">${esc(q.tiles[t])}</button>`).join('')}</div>
+    <div class="bank">${q.sh.filter(t=>!p.built.includes(t)).map(t=>`<button class="tile" data-a="tile" data-v="${t}">${esc(q.tiles[t])}</button>`).join('')}</div>
+    ${p.built.length?'<button class="clr" data-a="clear">↺ Start again</button>':''}`;}
+
+/* ----- answering ----- */
+function act(i,a,v){if(!M||!M.running||M.paused||M.over)return;const p=M.p[i];if(p.lock>0||!p.q||p.out)return;const q=p.q;
+  if(a==='pass'){if(M.sudden)return;reveal(i,1.3);return;}
+  if(a==='opt'){const k=+v;const b=$(`#az${i} [data-v="${k}"]`);
+    if(k===q.a){b.classList.add('right');good(i);}else{b.classList.add('wrong');if(M.sudden)return suddenMiss(i);bad(i,true,k);}return;}
+  if(a==='key'){SFX.tap();if(v==='back')p.input=p.input.slice(0,-1);else if(v==='ok'){if(!norm(p.input))return;
+      if(q.ans.some(x=>norm(x)===norm(p.input)))good(i);else{p.wrong++;if(p.wrong>=2)bad(i,true);else{bad(i,false);p.input='';tdisp(i);}}return;}
+    else if(p.input.length<26)p.input+=v;tdisp(i);return;}
+  if(a==='ml'){const k=+v;if(p.matched.some(x=>x[0]===k))return;p.sel=k;SFX.tap();paintMatch(i);return;}
+  if(a==='mr'){const k=+v;if(p.sel===null||p.matched.some(x=>x[1]===k))return;
+    if(q.Rt[k]===q.A[p.sel]){p.matched.push([p.sel,k]);p.sel=null;SFX.tap();paintMatch(i);if(p.matched.length===q.L.length)good(i);}
+    else{p.wrong++;const bs=[$(`#az${i} [data-a="ml"][data-v="${p.sel}"]`),$(`#az${i} [data-a="mr"][data-v="${k}"]`)];bs.forEach(b=>b&&b.classList.add('bad'));p.sel=null;
+      if(p.wrong>=3)bad(i,true);else{bad(i,false,null,1);setTimeout(()=>paintMatch(i),400);}}return;}
+  if(a==='tile'){p.built.push(+v);SFX.tap();paintOrder(i);
+    if(p.built.length===q.tiles.length){const s=p.built.map(t=>q.tiles[t]).join(' ');
+      if(s===q.tiles.join(' '))good(i);else{p.wrong++;if(p.wrong>=2)bad(i,true);else{bad(i,false);p.after=()=>{p.built=[];paintOrder(i);};}}}return;}
+  if(a==='untile'){p.built.splice(+v,1);paintOrder(i);return;}
+  if(a==='clear'){p.built=[];paintOrder(i);return;}
+}
+function good(i){const p=M.p[i],c=$('#qc'+i),pts=M.sudden?1:PTS[p.q.t];p.correct++;p.streak++;p.score+=pts;SFX.ok();
+  c.classList.remove('good');void c.offsetWidth;c.classList.add('good');plus(i,pts);
+  $('#sc'+i).textContent=p.score;$('#st'+i).textContent=p.streak>=3?'🔥×'+p.streak:'';tug();
+  if(M.sudden){finish(i);return;}
+  p.lock=.35;p.after=()=>newQ(i);}
+function bad(i,revealIt,picked,freeze){const p=M.p[i],c=$('#qc'+i);p.streak=0;$('#st'+i).textContent='';SFX.bad();
+  c.classList.remove('bad');void c.offsetWidth;c.classList.add('bad');
+  if(revealIt){const q=p.q;if(q.a!=null&&q.o){const r=$(`#az${i} [data-v="${q.a}"]`);r&&r.classList.add('right');}reveal(i,Math.max(S.freeze,1.4));}
+  else{p.lock=freeze??S.freeze;$('#h'+i).classList.add('lock');}}
+function reveal(i,secs){const p=M.p[i],c=$('#qc'+i);const r=document.createElement('div');r.className='reveal';
+  r.innerHTML=`<small>The answer</small><div><span>${p.q.t==='match'?answerText(p.q):esc(answerText(p.q))}</span></div>`;if(p.q.t==='match')r.style.fontSize='30px';
+  c.appendChild(r);p.lock=secs+(p.q.t==='match'||p.q.t==='order'?.8:0);$('#h'+i).classList.add('lock');p.after=()=>newQ(i);}
+function suddenMiss(i){const p=M.p[i];p.out=true;SFX.bad();p.lock=.01;$('#h'+i).classList.add('lock');$$(`#az${i} .opt`).forEach(b=>b.classList.add('out'));
+  if(M.p.every(x=>x.out)){setTimeout(()=>{if(!M||M.over)return;suddenQ();},1500);}}
+function suddenQ(){const pool=M.pool.filter(q=>['mcq','blank','fix','tf','tap'].includes(q.t));const base=pick(pool.length?pool:BANK.filter(q=>q.t==='mcq'));const q=prepQ(base);
+  M.p.forEach((p,i)=>{p.lock=0;p.after=null;$('#h'+i).classList.remove('lock');newQ(i,q);});}
+function plus(i,pts){const e=document.createElement('div');e.className='plus';e.textContent='+'+pts;e.style.left=(i?1440:480)-50+'px';e.style.top='420px';$('#match').appendChild(e);setTimeout(()=>e.remove(),1000);}
+function tug(){const d=M.p[1].score-M.p[0].score,x=50+Math.max(-45,Math.min(45,d*7));const t=$('#tug');if(t)t.style.left=x+'%';}
+function timeUp(){const [a,b]=M.p;if(a.score!==b.score){finish(a.score>b.score?0:1);return;}
+  M.paused=true;SFX.horn();overlay(`<div class="sd">⚡ SUDDEN DEATH ⚡<small>${a.score} – ${b.score} · the same question for both · first right answer wins!</small></div>`);
+  setTimeout(()=>{if(!M||M.over)return;overlay(null);M.sudden=true;M.paused=false;suddenQ();tickUI();},2600);}
+function finish(wi){if(M.over)return;stopMatch();M.running=false;const m=M.m,win=M.p[wi];SFX.end();
+  if(!M.demo){m.w=win.name;m.sa=M.p[0].score;m.sb=M.p[1].score;const st=[];M.p.forEach(p=>{S.stats[p.name]=S.stats[p.name]||{c:0};S.stats[p.name].c+=p.correct;st.push([p.name,p.correct]);});S.log.push({id:m.id,stats:st});save();}
+  const el=$('#result');const isFinal=!M.demo&&+m.id.split('-')[0]===S.bracket.rounds.length-1;
+  el.innerHTML=`<div class="center ${wi?'R':'L'}" style="color:#fff">
+    <div style="font-size:38px;font-weight:700;letter-spacing:4px;color:#fff4fa">${M.label} · WINNER</div><div class="trophy">${isFinal?'👑':'🏆'}</div><div class="winner">${esc(win.name)}</div>
+    <div style="font-size:64px;font-weight:700">${M.p[0].score} – ${M.p[1].score}${M.sudden?' <span style="font-size:36px">(sudden death)</span>':''}</div>
+    <div style="font-size:30px;color:#fff4fa">${esc(M.p[0].name)}: ${M.p[0].correct} right · ${esc(M.p[1].name)}: ${M.p[1].correct} right · Well played, both! 💕</div>
+    <div class="row" style="margin-top:20px">${M.demo?'<button class="btn g" id="rsH">⌂ Home</button>':`<button class="btn g" id="rsRe">↻ Replay match</button><button class="btn g" id="rsB" style="font-size:34px;color:var(--rose)">${isFinal?'👑 Crown the champion ▶':'Back to bracket ▶'}</button>`}</div></div>`;
+  show('result');confetti(260,wi?1440:480);
+  if(M.demo)$('#rsH').onclick=renderHome;else{$('#rsB').onclick=()=>isFinal?goChamp():goBracket();
+    $('#rsRe').onclick=async()=>{if(!(await ask('Replay this match? The result just recorded will be removed.','Replay')))return;const last=S.log.pop();(last.stats||[]).forEach(([n,c])=>{S.stats[n].c-=c;});m.w=null;m.sa=m.sb=0;save();goReady(m);};}}
+
+function goChamp(){const B=S.bracket,R=B.rounds.length,fin=B.rounds[R-1][0],champ=fin.w,ru=fin.a===champ?fin.b:fin.a;
+  const semis=R>1?B.rounds[R-2].map(m=>m.a===m.w?m.b:m.a).filter(Boolean):[];
+  const top=Object.entries(S.stats).sort((a,b)=>b[1].c-a[1].c).slice(0,5);
+  $('#champ').innerHTML=`${floaties()}<div class="center" style="gap:16px"><div style="font-size:36px;font-weight:700;letter-spacing:6px;color:var(--lav)">${CLS===LIST_ID?'':'GRADE '+CLS+' · '}GRAMMAR QUEEN</div><div class="trophy" style="font-size:200px">👑</div><div class="cname">${esc(champ)}</div>
+   <div class="lb"><div>🥈 Runner-up: <b>${esc(ru)}</b></div>${semis.map(s=>`<div>🥉 Semi-finalist: <b>${esc(s)}</b></div>`).join('')}</div>
+   <div style="font-size:28px;font-weight:700;color:var(--roseD);margin-top:14px">⭐ Most right answers in the whole tournament</div><div class="lb">${top.map(([n,v],i)=>`<div>${['🥇','🥈','🥉','4.','5.'][i]} ${esc(n)} · <b>${v.c}</b></div>`).join('')}</div>
+   <div class="row" style="margin-top:20px"><button class="btn g" id="cB">👑 View bracket</button><button class="btn" id="cH">⌂ Home</button></div></div>`;
+  show('champ');confetti(400);setTimeout(()=>confetti(300,500),900);setTimeout(()=>confetti(300,1400),1600);SFX.end();
+  $('#cH').onclick=renderHome;$('#cB').onclick=()=>{goBracket(false,true);$('#bPlay').textContent='👑 Champion';$('#bPlay').disabled=false;$('#bPlay').onclick=goChamp;};}
+addEventListener('keydown',e=>{if(e.target.matches('textarea,input'))return;if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen();}});
+renderHome();
+</script></body></html>

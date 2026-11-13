@@ -1,12 +1,17 @@
-// Read-aloud with a calm British woman's voice. The choice is remembered.
+// Read-aloud and listening practice.
+// Recordings (a calm British woman's voice, Sonia) ship with the site so it sounds the same on every device.
+// If a recording can't be played, or the visitor picks a device voice, the browser's own British female voice is used.
 (function () {
   const PREFERRED = ["Sonia", "Libby", "Maisie", "Serena", "Kate", "Stephanie", "Google UK English Female", "Martha", "Hazel", "Susan"];
   // Male voices plus macOS novelty voices, which don't sound calm or natural
   const MALE = /(Daniel|Arthur|Oliver|Ryan|Thomas|George|Alfie|Elliot|Ethan|Noah|Male|Rishi|Fred|Ralph|Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Albert|Jester|Junior|Whisper|Zarvox|Bubbles|Bells|Boing|Organ|Cellos|Trinoids|Wobble|Superstar|Bahh|News)/i;
   const KEY = "ecp-voice";
+  const RECORDED = "__recorded";
   const synth = window.speechSynthesis;
+  const player = new Audio();
   let voices = [];
-  let chosen = null;
+  let choice = RECORDED;
+  let activeBtn = null;
 
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -19,76 +24,93 @@
   }
 
   function refresh() {
-    if (!synth) return;
-    const all = synth.getVoices();
-    let gb = all.filter(v => /en[-_]GB/i.test(v.lang) && !MALE.test(v.name));
-    if (!gb.length) gb = all.filter(v => /^en/i.test(v.lang) && !MALE.test(v.name));
-    voices = gb.sort((a, b) => rank(a) - rank(b));
+    if (synth) {
+      const all = synth.getVoices();
+      let gb = all.filter(v => /en[-_]GB/i.test(v.lang) && !MALE.test(v.name));
+      if (!gb.length) gb = all.filter(v => /^en/i.test(v.lang) && !MALE.test(v.name));
+      voices = gb.sort((a, b) => rank(a) - rank(b));
+    }
     const saved = load(KEY);
-    chosen = voices.find(v => v.name === saved) || voices[0] || null;
+    choice = saved && voices.some(v => v.name === saved) ? saved : RECORDED;
     document.querySelectorAll(".voice-select").forEach(fill);
   }
 
   function fill(sel) {
     sel.innerHTML = "";
-    if (!voices.length) {
-      sel.innerHTML = "<option>No British voice found on this device</option>";
-      sel.disabled = true;
-      return;
-    }
-    sel.disabled = false;
+    const rec = document.createElement("option");
+    rec.value = RECORDED;
+    rec.textContent = "Sonia · British (recorded)";
+    sel.appendChild(rec);
     voices.forEach(v => {
       const o = document.createElement("option");
       o.value = v.name;
-      o.textContent = v.name.replace(/^Microsoft /, "").replace(/ Online \(Natural\)/, " (natural)");
-      if (chosen && v.name === chosen.name) o.selected = true;
+      o.textContent = v.name.replace(/^Microsoft /, "").replace(/ Online \(Natural\).*/, " (natural)") + " · this device";
       sel.appendChild(o);
     });
+    sel.value = choice;
   }
 
   function stop() {
+    player.pause();
+    player.onended = player.onerror = null;
     if (synth) synth.cancel();
-    document.querySelectorAll(".say.on").forEach(b => b.classList.remove("on"));
+    if (activeBtn) activeBtn.classList.remove("on");
+    activeBtn = null;
   }
 
-  function speak(text, btn) {
-    if (!synth) return;
-    const wasOn = btn && btn.classList.contains("on");
-    stop();
-    if (wasOn) return;
+  function deviceSpeak(text, btn) {
+    if (!synth || !text) { if (btn) btn.classList.remove("on"); return; }
     const u = new SpeechSynthesisUtterance(text);
-    if (chosen) { u.voice = chosen; u.lang = chosen.lang; } else { u.lang = "en-GB"; }
+    const v = voices.find(x => x.name === choice) || voices[0];
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "en-GB"; }
     u.rate = 0.9;
     u.pitch = 1;
-    if (btn) {
-      btn.classList.add("on");
-      u.onend = u.onerror = () => btn.classList.remove("on");
-    }
+    u.onend = u.onerror = () => { if (activeBtn === btn) { btn.classList.remove("on"); activeBtn = null; } };
     synth.speak(u);
+  }
+
+  function textFor(btn) {
+    if (btn.dataset.text) return btn.dataset.text;
+    const card = btn.closest(".tip, .listen-card");
+    if (!card) return "";
+    const script = card.querySelector(".script");
+    if (script) return [...script.querySelectorAll("p")].map(p => p.textContent.replace(/^[^:]{1,20}:\s*/, "")).join(" ");
+    const h = card.querySelector("h3"), p = card.querySelector("p");
+    return [h && h.textContent, p && p.textContent].filter(Boolean).join(". ");
+  }
+
+  function play(btn) {
+    const wasOn = btn === activeBtn;
+    stop();
+    if (wasOn) return;
+    activeBtn = btn;
+    btn.classList.add("on");
+    const src = btn.dataset.audio;
+    if (src && choice === RECORDED) {
+      player.src = src;
+      player.onended = () => { if (activeBtn === btn) { btn.classList.remove("on"); activeBtn = null; } };
+      player.onerror = () => deviceSpeak(textFor(btn), btn);
+      const p = player.play();
+      if (p && p.catch) p.catch(() => { if (activeBtn === btn && player.error) deviceSpeak(textFor(btn), btn); });
+    } else {
+      deviceSpeak(textFor(btn), btn);
+    }
   }
 
   document.addEventListener("change", e => {
     if (!e.target.classList.contains("voice-select")) return;
-    chosen = voices.find(v => v.name === e.target.value) || chosen;
-    save(KEY, chosen ? chosen.name : "");
-    document.querySelectorAll(".voice-select").forEach(fill);
+    stop();
+    choice = e.target.value;
+    save(KEY, choice);
+    document.querySelectorAll(".voice-select").forEach(s => s.value = choice);
   });
 
   document.addEventListener("click", e => {
-    const btn = e.target.closest(".say");
-    if (!btn) return;
-    const card = btn.closest(".tip");
-    const text = btn.dataset.text || (card ? card.innerText.replace(/🔊/g, "") : "");
-    speak(text, btn);
+    const btn = e.target.closest(".say, .play");
+    if (btn) play(btn);
   });
 
-  if (synth) {
-    refresh();
-    synth.onvoiceschanged = refresh;
-  } else {
-    document.querySelectorAll(".voice-bar").forEach(b => b.hidden = true);
-    document.querySelectorAll(".say").forEach(b => b.hidden = true);
-  }
-
-  window.ecpSpeak = speak;
+  addEventListener("pagehide", stop);
+  refresh();
+  if (synth) synth.onvoiceschanged = refresh;
 })();

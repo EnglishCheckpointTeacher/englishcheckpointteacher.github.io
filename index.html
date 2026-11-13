@@ -3,67 +3,240 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>English Checkpoint</title>
-<meta name="description" content="Cambridge English Checkpoint preparation for Grade 6 and Grade 8 — booklets, grammar, vocabulary, games and practice quizzes.">
+<title>English Checkpoint · Cambridge Checkpoint English preparation</title>
+<meta name="description" content="Free, exam-focused preparation for Cambridge Primary and Lower Secondary Checkpoint English, First Language and Second Language: papers explained, question types, writing guides, listening practice and quizzes.">
+<meta property="og:title" content="English Checkpoint">
+<meta property="og:description" content="Clear, exam-focused preparation for Cambridge Checkpoint English at Primary and Lower Secondary.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1e3a6d">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js"></script>
 </head>
 <body>
-<header class="site-header">
-  <div class="wrap">
-    <a class="logo" href="index.html">📘 English <span>Checkpoint</span></a>
-    <nav class="nav">
-      <a href="index.html" aria-current="page">Home</a>
-      <a href="grade-6.html">Grade 6</a>
-      <a href="grade-8.html">Grade 8</a>
-    </nav>
-  </div>
-</header>
+<site-header current="home"></site-header>
 
-<main>
-  <div class="wrap hero">
-    <span class="eyebrow">Cambridge English Checkpoint</span>
-    <h1>Read well. Write well.<br>Walk in ready.</h1>
-    <p class="lead">Everything you need to prepare for your English Checkpoint: skills guides, grammar, vocabulary, games and practice quizzes, all in one place.</p>
-  </div>
-
-  <section>
+<main id="main">
+  <div class="hero">
     <div class="wrap">
-      <h2>Choose your grade</h2>
-      <div class="grid two">
-        <a class="card grade-card g6" href="grade-6.html">
-          <div class="big">6</div>
-          <h3>Grade 6</h3>
-          <p>Primary Checkpoint English: the interactive booklet, Grammar Studio, Word Detectives vocabulary, grammar games and a practice quiz.</p>
-          <span class="go">Start Grade 6 →</span>
-        </a>
-        <a class="card grade-card g8" href="grade-8.html">
-          <div class="big">8</div>
-          <h3>Grade 8</h3>
-          <p>Lower Secondary English: language analysis, comparing texts, argument and narrative writing, plus a practice quiz.</p>
-          <span class="go">Start Grade 8 →</span>
-        </a>
+      <div>
+        <span class="pill"><span class="dot"><svg class="ic"><use href="assets/icons.svg#star"/></svg></span>Primary and Lower Secondary · First and Second Language</span>
+        <h1>Read well. Write well. Walk in <em>ready.</em></h1>
+        <p class="lead">Clear, exam-focused preparation for Cambridge Checkpoint English. See exactly what each paper asks, learn a method for every question type, study model answers and practise with instant feedback.</p>
+        <div class="btn-row">
+          <a class="btn" href="#choose">Choose your exam <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></a>
+          <a class="btn ghost" href="#which">Which exam do I take?</a>
+        </div>
+        <ul class="hero-meta">
+          <li><svg class="ic"><use href="assets/icons.svg#check-circle"/></svg>Free to use</li>
+          <li><svg class="ic"><use href="assets/icons.svg#check-circle"/></svg>No sign-up needed</li>
+          <li><svg class="ic"><use href="assets/icons.svg#check-circle"/></svg>Works on phones, tablets and smartboards</li>
+        </ul>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="sheet sheet-1">
+          <div class="tag-row"><span class="label">Paper 1</span><span class="chip">Primary</span></div>
+          <h4>Non-fiction</h4>
+          <div class="bar m"></div><div class="bar hl"></div><div class="bar s"></div>
+        </div>
+        <div class="sheet sheet-2">
+          <div class="tag-row"><span class="label">Paper 2</span><span class="chip">Lower Secondary</span></div>
+          <h4>Fiction</h4>
+          <div class="bar"></div><div class="bar m"></div><div class="bar s hl"></div>
+        </div>
+        <div class="sheet sheet-4"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span>Listening practice</div>
+        <div class="sheet sheet-3">
+          <div class="score">
+            <div class="ring"><span>9/10</span></div>
+            <p><b>Practice quiz complete</b>Excellent work. You're on track for Checkpoint.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="wrap">
+      <ul>
+        <li><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#file"/></svg></span><span>Every paper explained<small>Timings, sections, marks</small></span></li>
+        <li><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#target"/></svg></span><span>Question types<small>A method for each one</small></span></li>
+        <li><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#pen"/></svg></span><span>Writing guides<small>Checklists and model answers</small></span></li>
+        <li><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#headphones"/></svg></span><span>Listening practice<small>Recorded British voices</small></span></li>
+        <li><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#quiz"/></svg></span><span>Practice quizzes<small>Instant feedback</small></span></li>
+      </ul>
+    </div>
+  </div>
+
+  <section id="choose">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Start here</span>
+        <h2>Choose your exam</h2>
+        <p>There are four Checkpoint English exams. Pick your level, then First Language or Second Language. Your teacher can tell you which one you are entered for.</p>
+      </div>
+
+      <div class="level" id="primary">
+        <div class="level-head"><h3>Primary Checkpoint</h3><span>Taken at the end of Stage 6, around age 11</span></div>
+        <div class="grid two">
+          <a class="card exam-card primary" href="primary-english.html">
+            <span class="lang">First Language</span>
+            <h3>English</h3>
+            <div class="codes"><span class="code">Syllabus 0058</span></div>
+            <p class="mini"><span><b>2</b> papers</span><span><b>1 hour</b> each</span><span><b>50</b> marks each</span></p>
+            <ul class="ticks">
+              <li>Paper 1 Non-fiction and Paper 2 Fiction</li>
+              <li>Reading questions and one writing task in each paper</li>
+              <li>Interactive booklet, Grammar Studio, vocabulary and games</li>
+            </ul>
+            <span class="go">Open Primary English <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></span>
+          </a>
+          <a class="card exam-card primary" href="primary-esl.html">
+            <span class="lang">Second Language</span>
+            <h3>English as a Second Language</h3>
+            <div class="codes"><span class="code">Syllabus 0057</span></div>
+            <p class="mini"><span><b>3</b> papers</span><span><b>35, 25 and 35</b> minutes</span></p>
+            <ul class="ticks">
+              <li>Reading and Usage, Listening, and Writing</li>
+              <li>Everyday grammar, vocabulary and short writing tasks</li>
+              <li>Listening practice with recorded audio</li>
+            </ul>
+            <span class="go">Open Primary ESL <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="level" id="secondary">
+        <div class="level-head"><h3>Lower Secondary Checkpoint</h3><span>Taken at the end of Stage 9, around age 14</span></div>
+        <div class="grid two">
+          <a class="card exam-card secondary" href="secondary-english.html">
+            <span class="lang">First Language</span>
+            <h3>English</h3>
+            <div class="codes"><span class="code">Syllabus 0861</span></div>
+            <p class="mini"><span><b>2</b> papers</span><span><b>1 hour 10 minutes</b> each</span><span><b>50</b> marks each</span></p>
+            <ul class="ticks">
+              <li>Paper 1 Non-fiction and Paper 2 Fiction</li>
+              <li>Language analysis, structure, viewpoint and summary</li>
+              <li>Argument, discussion, narrative and descriptive writing</li>
+            </ul>
+            <span class="go">Open Lower Secondary English <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></span>
+          </a>
+          <a class="card exam-card secondary" href="secondary-esl.html">
+            <span class="lang">Second Language</span>
+            <h3>English as a Second Language</h3>
+            <div class="codes"><span class="code">Syllabus 0876</span></div>
+            <p class="mini"><span><b>3</b> papers</span><span><b>45, 35 and 40</b> minutes</span></p>
+            <ul class="ticks">
+              <li>Reading and Usage, Listening, and Writing</li>
+              <li>Tenses, conditionals, passives and word formation</li>
+              <li>Email guide and listening practice with recorded audio</li>
+            </ul>
+            <span class="go">Open Lower Secondary ESL <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section>
+  <section class="alt" id="how">
     <div class="wrap">
-      <h2>How Checkpoint English works</h2>
-      <p class="section-intro">The exam checks three things. Every page on this site is organised around them.</p>
-      <div class="grid">
-        <div class="card"><div class="icon">📖</div><h3>Reading</h3><p>Find information, read between the lines, and explain how writers use language and structure.</p></div>
-        <div class="card"><div class="icon">✍️</div><h3>Writing</h3><p>Plan and write fiction and non-fiction for a clear purpose and audience.</p></div>
-        <div class="card"><div class="icon">🔤</div><h3>Language</h3><p>Grammar, punctuation, spelling and vocabulary: the tools that make your writing accurate.</p></div>
+      <div class="section-head">
+        <span class="eyebrow">How to use this site</span>
+        <h2>Three steps to exam day</h2>
+        <p>Each exam page follows the same order, so you always know what to do next.</p>
+      </div>
+      <ol class="steps">
+        <li><h3>Know the paper</h3><p>Start with the papers section: how long you have, what each section asks, and how to share your time between reading and writing.</p></li>
+        <li><h3>Learn the methods</h3><p>Every question type has a method, and every kind of writing has a checklist and a model answer. Learn them until they are automatic.</p></li>
+        <li><h3>Practise and check</h3><p>Take the quiz, listen to the tips, tick off the revision checklist, and come back to the parts you found hard.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="which">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Not sure?</span>
+        <h2>First Language or Second Language?</h2>
+        <p>Your school decides which exam you are entered for. This is how the two are different.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="compare">
+          <thead><tr><th></th><th>English (First Language)</th><th>English as a Second Language</th></tr></thead>
+          <tbody>
+            <tr><td>Who it is for</td><td>Learners who use English as their main language at school, at home or both</td><td>Learners who are developing English alongside another main language</td></tr>
+            <tr><td>Papers</td><td>Two papers: Non-fiction and Fiction. Each has a reading section and a writing section</td><td>Three papers: Reading and Usage, Listening, and Writing</td></tr>
+            <tr><td>Reading</td><td>Longer fiction and non-fiction texts. Explain meaning, language choices, structure and the writer's purpose</td><td>Shorter texts. Find information, understand main ideas and opinions, and choose the right word</td></tr>
+            <tr><td>Writing</td><td>Extended writing for a purpose and audience: stories, descriptions, reports, arguments, letters</td><td>Shorter, practical writing such as emails, messages and short stories, with accurate grammar</td></tr>
+            <tr><td>Grammar</td><td>Tested inside the reading and writing tasks</td><td>Tested directly in "usage" questions</td></tr>
+            <tr><td>Listening</td><td>Not tested</td><td>Tested in its own paper. You hear each recording twice</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="tight" id="facts">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Good to know</span>
+        <h2>How Checkpoint works</h2>
+        <p>The same rules apply to all four English exams.</p>
+      </div>
+      <div class="grid three">
+        <div class="card"><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#calendar"/></svg></span><h3>When it happens</h3><p>Checkpoint tests run in three series each year: March, May and October. Your school chooses the series and tells you the exact dates.</p></div>
+        <div class="card"><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#users"/></svg></span><h3>Who marks it</h3><p>You sit the papers at your own school, but they are marked by Cambridge examiners, not by your teacher.</p></div>
+        <div class="card"><span class="chip-ic"><svg class="ic"><use href="assets/icons.svg#award"/></svg></span><h3>What you get back</h3><p>A statement of achievement and a report showing how you did overall and in each skill, so you and your teacher can see your strengths.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="about">
+        <div class="avatar" aria-hidden="true">HK</div>
+        <div>
+          <span class="eyebrow">About this site</span>
+          <blockquote>"Checkpoint isn't about tricks. When you know what the question wants and you have a method, you can show what you really know."</blockquote>
+          <cite>Ms. Hnan Khalid<small>English teacher and author of English Checkpoint</small></cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Questions and answers</span>
+        <h2>For students and parents</h2>
+      </div>
+      <div class="faq">
+        <details><summary>What is Cambridge Checkpoint?</summary><div><p>Checkpoint is a set of tests from Cambridge for the end of the primary programme (Stage 6) and the end of the lower secondary programme (Stage 9). It shows what a learner has understood in English, mathematics and science, and gives feedback on strengths and areas to improve before the next stage of school.</p></div></details>
+        <details><summary>Can you pass or fail Checkpoint?</summary><div><p>No. Checkpoint is not a pass or fail exam. It is a check on your progress. The report shows how well you did in each skill, so the result is most useful as a guide to what to work on next.</p></div></details>
+        <details><summary>How long before the exam should I start revising?</summary><div><p>About four weeks of steady revision works well for most learners. Each exam page has a four-week plan and a checklist you can tick off. Twenty focused minutes a day is better than one long session at the weekend.</p></div></details>
+        <details><summary>Where can I find past papers?</summary><div><p>Cambridge gives past papers and specimen papers to registered schools through its School Support Hub, so ask your teacher. This site teaches the skills and methods you need for those papers, with original practice questions.</p></div></details>
+        <details><summary>Does this site work without the internet?</summary><div><p>You need a connection to open each page. Once a page is open you can keep reading it, and you can print any exam page to revise on paper.</p></div></details>
+        <details><summary>Is this an official Cambridge website?</summary><div><p>No. English Checkpoint is an independent site written by a teacher. For official information, follow the links to Cambridge at the bottom of each exam page, and always check exam dates and details with your school.</p></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="tight">
+    <div class="wrap">
+      <div class="band">
+        <div>
+          <h2>Ready to test yourself?</h2>
+          <p>Every exam page has a bank of twenty questions. They come in a new order each time, with an explanation for every answer.</p>
+        </div>
+        <a class="btn" href="#choose">Pick an exam <svg class="ic"><use href="assets/icons.svg#arrow"/></svg></a>
       </div>
     </div>
   </section>
 </main>
 
-<footer>
-  <div class="wrap">English Checkpoint · Ms. Hnan Khalid · Practice materials for Grade 6 and Grade 8 students</div>
-</footer>
+<site-footer></site-footer>
 </body>
 </html>

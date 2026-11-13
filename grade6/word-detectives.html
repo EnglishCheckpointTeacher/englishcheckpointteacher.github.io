@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Detectives — Grade 6 Vocabulary</title>
+<style>
+:root{
+  --board:#111a33;
+  --panel:#22315a;
+  --accent:#f0bf4c;
+  --accent-dk:#c99a2e;
+  --glow:rgba(240,191,76,.16);
+  --manila:#f1e3c3;
+  --manila-dk:#dcc99c;
+  --ink:#16203c;
+  --stamp:#c0392b;
+  --good:#37a68b;
+  --bad:#ff8f7e;
+  --paper-line:#b9a575;
+  --display:"Rockwell","Bookman Old Style",Georgia,serif;
+  --type:"Courier New",Consolas,monospace;
+  --body:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--body);color:#f4f1e8;background:var(--board);
+  background-image:
+    radial-gradient(circle at 18% 12%, var(--glow), transparent 46%),
+    radial-gradient(circle at 84% 82%, rgba(55,166,139,.10), transparent 50%),
+    radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:auto,auto,22px 22px;overflow:hidden;
+  transition:background .5s ease;
+}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.tlabel{font-family:var(--type);font-size:11.5px;letter-spacing:.12em;color:#9fabc9;font-weight:400}
+
+/* ---------- shell ---------- */
+#app{display:flex;flex-direction:column;height:100%}
+.topbar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px 18px;background:rgba(9,14,29,.72);
+  border-bottom:2px solid var(--accent);flex:0 0 auto;
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--display);letter-spacing:.03em;font-size:19px}
+.lens{
+  width:30px;height:30px;border-radius:50%;border:3px solid var(--accent);
+  display:grid;place-items:center;font-size:14px;position:relative;flex:0 0 auto;
+  background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.35), var(--glow));
+}
+.lens::after{content:"";position:absolute;width:11px;height:4px;background:var(--accent);border-radius:2px;right:-9px;bottom:0;transform:rotate(42deg)}
+.listchip{
+  display:flex;align-items:center;gap:8px;background:var(--accent);color:var(--ink);
+  padding:6px 13px;border-radius:999px;font-weight:700;font-size:14px;
+}
+.listchip small{font-weight:400;opacity:.75}
+.listchip:hover{filter:brightness(1.08)}
+.meter{display:flex;align-items:center;gap:9px;font-family:var(--type);font-size:12.5px;color:#cfd8ef}
+.meter .bar{width:120px;height:9px;background:rgba(255,255,255,.14);border-radius:5px;overflow:hidden}
+.meter .fill{height:100%;width:0;background:var(--accent);transition:width .45s ease}
+.rank{font-family:var(--type);font-size:12.5px;color:var(--accent);border:1px dashed var(--accent);padding:3px 9px;border-radius:3px;white-space:nowrap}
+.spacer{flex:1}
+.teams{display:flex;gap:8px}
+.team{
+  display:flex;align-items:center;gap:6px;padding:5px 6px 5px 11px;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);font-size:13.5px;
+}
+.team b{font-family:var(--type);font-size:15px;color:var(--accent);min-width:18px;text-align:center}
+.team .plus,.team .minus{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.1);font-size:15px;line-height:1;display:grid;place-items:center}
+.team .plus:hover,.team .minus:hover{background:var(--accent);color:var(--ink)}
+.iconbtn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:16px}
+.iconbtn:hover{background:var(--accent);color:var(--ink)}
+
+main{flex:1;min-height:0;position:relative}
+.screen{position:absolute;inset:0;overflow:auto;padding:22px 26px 12px;display:none}
+.screen.active{display:block}
+.screen h2{font-family:var(--display);font-size:clamp(21px,2.5vw,30px);letter-spacing:.01em}
+.screen .sub{color:#b9c4e0;font-size:14.5px;margin-top:5px;max-width:74ch}
+
+.tabs{
+  flex:0 0 auto;display:flex;gap:8px;padding:9px 18px 13px;
+  background:rgba(9,14,29,.72);border-top:2px solid var(--accent);overflow-x:auto;
+}
+.tab{padding:9px 14px;border-radius:7px;font-size:14px;white-space:nowrap;background:rgba(255,255,255,.06)}
+.tab:hover{background:rgba(255,255,255,.13)}
+.tab.on{background:var(--accent);color:var(--ink);font-weight:700}
+
+/* ---------- list picker ---------- */
+#picker{
+  position:fixed;inset:0;z-index:50;background:var(--board);display:none;overflow:auto;padding:36px 30px 40px;
+  background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,.08),transparent 55%),radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:auto,22px 22px;
+}
+#picker.open{display:block}
+.pickhead{text-align:center;max-width:760px;margin:0 auto}
+.pickhead .eyebrow{font-family:var(--type);font-size:13px;letter-spacing:.24em;color:#c3cee9}
+.pickhead h1{font-family:var(--display);font-size:clamp(34px,5.5vw,62px);line-height:1;margin-top:10px}
+.pickhead p{color:#b9c4e0;margin-top:12px;font-size:16px}
+.folders{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:26px 22px;
+  max-width:1240px;margin:36px auto 0;
+}
+.folder{
+  position:relative;text-align:left;border-radius:6px;padding:22px 20px 18px;color:var(--ink);
+  background:var(--fc);box-shadow:0 10px 0 -4px var(--fd),0 18px 30px rgba(0,0,0,.45);
+  transition:transform .18s ease;min-height:200px;display:flex;flex-direction:column;
+}
+.folder::before{content:"";position:absolute;top:-12px;left:18px;width:82px;height:14px;background:var(--fd);border-radius:5px 5px 0 0}
+.folder:hover{transform:translateY(-7px)}
+.folder .num{font-family:var(--type);font-size:12px;letter-spacing:.14em;opacity:.7}
+.folder .name{font-family:var(--display);font-size:29px;line-height:1.05;margin-top:6px}
+.folder .pages{font-family:var(--type);font-size:12px;margin-top:6px;opacity:.75}
+.folder .sample{margin-top:12px;font-size:14px;line-height:1.5;opacity:.9;flex:1}
+.folder .foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-family:var(--type);font-size:12.5px}
+.folder .pbar{height:7px;background:rgba(0,0,0,.14);border-radius:4px;overflow:hidden;margin-top:8px}
+.folder .pbar i{display:block;height:100%;background:var(--ink);opacity:.75}
+.folder .emo{position:absolute;right:16px;top:14px;font-size:30px}
+.folder .done{position:absolute;right:14px;bottom:56px;transform:rotate(-12deg);border:3px double var(--stamp);color:var(--stamp);font-family:var(--type);font-size:11px;letter-spacing:.1em;padding:3px 7px;border-radius:3px;display:none}
+.folder.complete .done{display:block}
+
+/* ---------- case board ---------- */
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 18px;margin-top:20px;padding-bottom:16px}
+.case{
+  position:relative;background:var(--manila);color:var(--ink);border-radius:2px 2px 3px 3px;padding:16px 10px 13px;
+  text-align:center;box-shadow:0 8px 0 -4px var(--manila-dk),0 12px 22px rgba(0,0,0,.42);transition:transform .16s ease;font-family:var(--type);
+}
+.case::before{content:"";position:absolute;top:-9px;left:14px;width:52px;height:11px;background:var(--manila-dk);border-radius:3px 3px 0 0}
+.case::after{
+  content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#ff8b7a,#a8281a);box-shadow:0 2px 3px rgba(0,0,0,.4);
+}
+.case:nth-child(3n){transform:rotate(-1.1deg)}
+.case:nth-child(4n){transform:rotate(1.3deg)}
+.case:hover{transform:translateY(-5px) rotate(0deg)}
+.case .no{font-size:11px;letter-spacing:.12em;color:#7a6a45;margin-top:8px}
+.case .clue{font-size:40px;line-height:1.25;margin:6px 0 4px}
+.case .status{font-size:12px;color:#8a7850;letter-spacing:.06em}
+.case .word{font-family:var(--display);font-size:17.5px;display:none;line-height:1.1}
+.case.done .word{display:block}
+.case.done .status{display:none}
+.case .stamp{
+  display:none;position:absolute;right:-6px;bottom:6px;transform:rotate(-13deg);border:3px double var(--stamp);color:var(--stamp);
+  font-family:var(--type);font-size:10.5px;letter-spacing:.09em;padding:3px 6px;border-radius:3px;opacity:.85;
+}
+.case.done .stamp{display:block}
+.case.done{box-shadow:0 8px 0 -4px var(--manila-dk),0 12px 22px rgba(0,0,0,.42),inset 0 0 0 2px rgba(55,166,139,.5)}
+
+/* ---------- case file overlay ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,10,22,.9);z-index:40;display:none;place-items:center;padding:22px}
+.overlay.open{display:grid}
+.file{
+  width:min(1000px,96vw);max-height:92vh;overflow:auto;background:var(--manila);color:var(--ink);border-radius:3px;padding:26px 30px 24px;position:relative;
+  box-shadow:0 26px 60px rgba(0,0,0,.6);
+  background-image:repeating-linear-gradient(180deg,transparent,transparent 33px,rgba(185,165,117,.28) 33px,rgba(185,165,117,.28) 34px);
+}
+.file .close{position:absolute;top:12px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(22,32,60,.1);font-size:19px;color:var(--ink)}
+.file .close:hover{background:var(--stamp);color:#fff}
+.filehead{font-family:var(--type);font-size:12.5px;letter-spacing:.14em;color:#8a7850;border-bottom:2px solid var(--paper-line);padding-bottom:9px}
+.evidence{display:flex;gap:24px;align-items:center;margin-top:20px;flex-wrap:wrap}
+.photo{
+  flex:0 0 auto;width:132px;height:132px;background:#fff;border:1px solid var(--manila-dk);padding:9px 9px 24px;
+  box-shadow:0 7px 16px rgba(0,0,0,.28);transform:rotate(-2.4deg);display:grid;place-items:center;font-size:62px;
+}
+.statement{flex:1;min-width:280px}
+.statement .lbl{font-family:var(--type);font-size:11.5px;letter-spacing:.13em;color:#8a7850}
+.sentence{font-family:var(--type);font-size:clamp(16px,2vw,21px);line-height:1.75;margin-top:8px}
+.redact{display:inline-block;position:relative;background:var(--ink);color:transparent;padding:1px 10px;border-radius:2px;cursor:pointer;user-select:none;transition:background .3s,color .3s}
+.redact::after{content:"tap to reveal";position:absolute;left:0;right:0;top:100%;font-size:10px;letter-spacing:.08em;color:#8a7850;text-align:center}
+.redact.shown{background:rgba(240,191,76,.5);color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--stamp)}
+.redact.shown::after{content:""}
+.ask{margin-top:20px;font-size:17px;color:#4b4126;font-style:italic}
+.revealbtn{margin-top:18px;background:var(--ink);color:var(--manila);padding:13px 26px;border-radius:5px;font-family:var(--display);font-size:17px;box-shadow:0 5px 0 #050a19}
+.revealbtn:hover{background:#22315a}
+.revealbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #050a19}
+.solution{display:none;margin-top:20px;border-top:2px solid var(--paper-line);padding-top:18px}
+.solution.show{display:block;animation:unfold .45s ease}
+@keyframes unfold{from{opacity:0;transform:translateY(-9px)}to{opacity:1;transform:none}}
+.solution .theword{font-family:var(--display);font-size:clamp(34px,5.2vw,54px);line-height:1.05}
+.pos{display:inline-block;font-family:var(--type);font-size:12px;letter-spacing:.1em;background:var(--ink);color:var(--manila);padding:3px 9px;border-radius:3px;margin-top:9px}
+.definition{font-size:clamp(17px,2.1vw,22px);line-height:1.5;margin-top:13px;max-width:62ch}
+.synant{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.synant > div{background:rgba(22,32,60,.06);border-left:5px solid var(--good);padding:12px 15px;border-radius:0 4px 4px 0}
+.synant > div:last-child{border-left-color:var(--stamp)}
+.synant h4{font-family:var(--type);font-size:11.5px;letter-spacing:.12em;color:#6d5f3d;font-weight:400}
+.synant p{font-size:16.5px;margin-top:6px;line-height:1.5}
+.filenav{display:flex;gap:10px;margin-top:22px;align-items:center;flex-wrap:wrap}
+.navbtn{background:rgba(22,32,60,.09);padding:10px 17px;border-radius:5px;font-size:14.5px}
+.navbtn:hover{background:rgba(22,32,60,.2)}
+.navbtn.primary{background:var(--good);color:#06231c;font-weight:700}
+.hintkeys{font-family:var(--type);font-size:11.5px;color:#8a7850;margin-left:auto}
+
+/* ---------- shared ---------- */
+.panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:16px 20px;margin-top:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{background:var(--accent);color:var(--ink);font-weight:700;padding:11px 20px;border-radius:6px;font-size:15px;box-shadow:0 4px 0 var(--accent-dk)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-dk)}
+.btn.ghost{background:rgba(255,255,255,.09);color:#f4f1e8;box-shadow:none;font-weight:400}
+.btn.ghost:hover{background:rgba(255,255,255,.18)}
+.score{font-family:var(--type);font-size:14px;color:var(--accent)}
+.segbar{display:inline-flex;background:rgba(255,255,255,.07);border-radius:7px;padding:4px;gap:4px;flex-wrap:wrap}
+.seg{padding:8px 14px;border-radius:5px;font-size:14px}
+.seg.on{background:var(--accent);color:var(--ink);font-weight:700}
+.award{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:#b9c4e0}
+.award button{background:rgba(255,255,255,.12);padding:7px 13px;border-radius:999px;font-size:13.5px}
+.award button:hover{background:var(--accent);color:var(--ink)}
+
+/* ---------- fill the gaps ---------- */
+.bank{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.chip{background:var(--manila);color:var(--ink);font-family:var(--type);font-size:16px;padding:9px 16px;border-radius:4px;box-shadow:0 4px 0 var(--manila-dk)}
+.chip:hover{transform:translateY(-2px)}
+.chip.sel{background:var(--accent);box-shadow:0 4px 0 var(--accent-dk),0 0 0 3px rgba(255,255,255,.35)}
+.chip.used{opacity:.22;pointer-events:none}
+.qlist{margin-top:6px}
+.q{display:flex;gap:13px;align-items:baseline;padding:11px 0;border-bottom:1px dashed rgba(255,255,255,.14);font-size:clamp(15px,1.7vw,18.5px);line-height:1.6}
+.q .num{font-family:var(--type);color:var(--accent);flex:0 0 26px}
+.blank{display:inline-block;min-width:132px;text-align:center;font-family:var(--type);border-bottom:3px solid var(--accent);padding:1px 9px;cursor:pointer;color:var(--accent)}
+.blank:hover{background:rgba(255,255,255,.1)}
+.blank.filled{color:#fff;border-bottom-color:#fff}
+.blank.right{color:var(--good);border-bottom-color:var(--good)}
+.blank.wrong{color:var(--bad);border-bottom-color:var(--bad);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* ---------- red string ---------- */
+.stringwrap{position:relative;margin-top:16px}
+#strings{position:absolute;inset:0;pointer-events:none;z-index:2}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(60px,10vw,150px);position:relative;z-index:3}
+.cols h4{margin-bottom:8px}
+.pinlist{display:flex;flex-direction:column;gap:clamp(7px,1.2vh,12px)}
+.pin{background:var(--manila);color:var(--ink);padding:clamp(9px,1.5vh,14px) 16px;border-radius:3px;font-size:clamp(14px,1.7vw,19px);text-align:left;box-shadow:0 3px 0 var(--manila-dk)}
+.cols > div:last-child .pin{text-align:right}
+.pin:hover{transform:translateY(-2px)}
+.pin.sel{background:var(--accent);box-shadow:0 3px 0 var(--accent-dk),0 0 0 3px rgba(255,255,255,.4)}
+.pin.linked{background:rgba(55,166,139,.28);color:#d7fff3;box-shadow:none;pointer-events:none}
+.pin.bad{animation:shake .35s;background:var(--bad)}
+
+/* ---------- bingo ---------- */
+.bingo{display:grid;gap:11px;margin-top:16px;max-width:900px}
+.cell{background:var(--manila);color:var(--ink);border-radius:4px;padding:clamp(12px,2.4vh,26px) 8px;font-family:var(--display);font-size:clamp(14px,1.8vw,21px);position:relative;box-shadow:0 5px 0 var(--manila-dk);line-height:1.15}
+.cell.free{background:var(--accent)}
+.cell.hit{background:#2a3a68;color:#93a3c9;box-shadow:none}
+.cell.hit::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(38px,5vw,60px);color:var(--stamp);opacity:.85;font-family:var(--body)}
+.caller{margin-top:16px;background:rgba(255,255,255,.06);border:2px dashed var(--accent);border-radius:9px;padding:18px 22px;min-height:96px;display:flex;flex-direction:column;justify-content:center}
+.caller .kind{font-family:var(--type);font-size:11.5px;letter-spacing:.13em;color:var(--accent)}
+.caller .clue{font-size:clamp(17px,2.4vw,26px);line-height:1.4;margin-top:8px}
+.bingo-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr);gap:24px;align-items:start}
+
+/* ---------- quick fire ---------- */
+.qf{max-width:980px;margin:16px auto 0}
+.qf .prompt{background:var(--manila);color:var(--ink);border-radius:8px;padding:clamp(18px,3vh,30px) 26px;font-size:clamp(19px,2.6vw,29px);line-height:1.4;text-align:center;box-shadow:0 8px 0 var(--manila-dk);min-height:120px;display:grid;place-items:center}
+.qf .prompt small{display:block;font-family:var(--type);font-size:12px;letter-spacing:.14em;color:#8a7850;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.opt{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.14);border-radius:9px;padding:clamp(14px,2.4vh,24px);font-family:var(--display);font-size:clamp(18px,2.4vw,26px);transition:transform .12s}
+.opt:hover{transform:translateY(-3px);border-color:var(--accent)}
+.opt.right{background:var(--good);color:#06231c;border-color:var(--good)}
+.opt.wrong{background:var(--bad);color:var(--ink);border-color:var(--bad);animation:shake .35s}
+.opt.dim{opacity:.35;pointer-events:none}
+.qf .meta{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px}
+.qf .qtimer{font-family:var(--type);font-size:30px;color:var(--accent);min-width:60px;text-align:center}
+.qf .qtimer.low{color:var(--bad)}
+
+/* ---------- scramble ---------- */
+.scr{max-width:900px;margin:16px auto 0;text-align:center}
+.scr .hint{background:var(--manila);color:var(--ink);border-radius:8px;padding:18px 24px;font-size:clamp(16px,2.1vw,22px);line-height:1.45;box-shadow:0 6px 0 var(--manila-dk)}
+.scr .hint small{display:block;font-family:var(--type);font-size:12px;letter-spacing:.14em;color:#8a7850;margin-bottom:6px}
+.tiles{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:22px;min-height:64px}
+.tile{width:clamp(44px,5.6vw,66px);height:clamp(48px,6vw,70px);background:var(--manila);color:var(--ink);border-radius:6px;font-family:var(--display);font-size:clamp(20px,2.8vw,32px);box-shadow:0 5px 0 var(--manila-dk);text-transform:uppercase}
+.tile:hover{transform:translateY(-3px)}
+.tile.gone{visibility:hidden}
+.answer{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:18px;min-height:74px;padding:10px;border:2px dashed rgba(255,255,255,.22);border-radius:10px}
+.answer .tile{background:var(--accent);box-shadow:0 5px 0 var(--accent-dk)}
+.answer.right .tile{background:var(--good);color:#06231c;box-shadow:0 5px 0 #24705d}
+.answer.wrong .tile{background:var(--bad);animation:shake .35s}
+
+/* ---------- charades ---------- */
+.actcard{width:min(560px,92vw);margin:20px auto 0;background:var(--manila);color:var(--ink);border-radius:8px;padding:34px 26px;text-align:center;box-shadow:0 16px 34px rgba(0,0,0,.45);min-height:230px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.actcard .back{font-family:var(--type);font-size:15px;letter-spacing:.14em;color:#8a7850}
+.actcard .big{font-family:var(--display);font-size:clamp(32px,6vw,58px);line-height:1.05}
+.actcard .cd{font-family:var(--type);font-size:52px;color:var(--stamp)}
+.timer{font-family:var(--type);font-size:clamp(34px,7vw,64px);text-align:center;margin-top:14px;color:var(--accent)}
+.timer.low{color:var(--bad)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:20px}
+.rule{background:rgba(255,255,255,.05);border-radius:8px;padding:13px 15px;font-size:14.5px;line-height:1.5}
+.rule span{font-family:var(--type);color:var(--accent);display:block;font-size:12px;letter-spacing:.1em;margin-bottom:5px}
+
+/* ---------- finale ---------- */
+.finale{text-align:center;padding-top:clamp(10px,5vh,60px)}
+.finale .big{font-family:var(--display);font-size:clamp(38px,8vw,86px);line-height:1}
+.wordwall{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px;max-width:960px;margin-left:auto;margin-right:auto}
+.wordwall span{font-family:var(--display);font-size:clamp(15px,1.9vw,21px);background:var(--manila);color:var(--ink);padding:7px 15px;border-radius:3px;box-shadow:0 4px 0 var(--manila-dk)}
+.wordwall span:nth-child(2n){transform:rotate(-1.4deg)}
+.wordwall span:nth-child(3n){transform:rotate(1.6deg)}
+
+/* ---------- intro ---------- */
+#intro{position:fixed;inset:0;z-index:60;background:var(--board);display:grid;place-items:center;text-align:center;padding:24px;background-image:radial-gradient(circle at 50% 42%,rgba(240,191,76,.20),transparent 58%)}
+#intro .eyebrow{font-family:var(--type);font-size:13px;letter-spacing:.24em;color:#f0bf4c}
+#intro .title{font-family:var(--display);font-size:clamp(46px,11vw,132px);line-height:.94;margin-top:14px}
+#intro .title em{font-style:normal;display:block;color:#f0bf4c}
+#intro .tag{font-size:clamp(15px,2vw,20px);color:#c3cee9;margin-top:18px}
+#intro .emo{font-size:clamp(26px,4vw,44px);letter-spacing:.22em;margin-top:20px}
+#intro .btn{margin-top:28px;padding:15px 30px;font-size:18px;background:#f0bf4c;box-shadow:0 4px 0 #c99a2e}
+#intro .credit{position:absolute;bottom:20px;font-family:var(--type);font-size:12px;color:#7f8cae;letter-spacing:.08em}
+.fadeout{animation:fade .5s forwards}
+@keyframes fade{to{opacity:0;visibility:hidden}}
+
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:70;display:none}
+.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:80;background:var(--accent);color:var(--ink);font-family:var(--display);font-size:20px;padding:12px 26px;border-radius:6px;box-shadow:0 10px 26px rgba(0,0,0,.5);display:none}
+.toast.show{display:block;animation:pop .35s ease}
+@keyframes pop{from{transform:translate(-50%,-14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
+@media (max-width:820px){
+  .synant,.bingo-layout,.opts{grid-template-columns:1fr}
+  .meter .bar{width:80px}
+  .brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div>
+    <p class="eyebrow">GRADE 6 · VOCABULARY · BOOKLET 2024-25</p>
+    <h1 class="title">WORD<em>DETECTIVES</em></h1>
+    <p class="tag">Seven case files. Eighty-six words hiding in plain sight. Pick a list, then crack it one word at a time.</p>
+    <p class="emo">🔍 📖 💡 ✅</p>
+    <button class="btn" id="startBtn">Choose a list</button>
+  </div>
+  <p class="credit">LOOK · READ · GUESS · REVEAL</p>
+</div>
+
+<div id="picker">
+  <div class="pickhead">
+    <p class="eyebrow">CASE ARCHIVE</p>
+    <h1>Which list are we cracking today?</h1>
+    <p>Each folder is one list from the booklet. Every game inside adapts to the list you choose.</p>
+  </div>
+  <div class="folders" id="folders"></div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="lens">🔍</span><span>Word Detectives</span></div>
+    <button class="listchip" id="listChip" title="Change list">List One <small>· change</small></button>
+    <div class="meter">
+      <span>CASES</span>
+      <span class="bar"><span class="fill" id="progFill"></span></span>
+      <span id="progText">0/0</span>
+    </div>
+    <div class="rank" id="rankChip">Rank: Cadet</div>
+    <div class="spacer"></div>
+    <div class="teams">
+      <div class="team"><span id="tAname">Team A</span><b id="tAscore">0</b><button class="minus" data-team="A" data-d="-1" title="Remove a point">−</button><button class="plus" data-team="A" data-d="1" title="Award a point">+</button></div>
+      <div class="team"><span id="tBname">Team B</span><b id="tBscore">0</b><button class="minus" data-team="B" data-d="-1" title="Remove a point">−</button><button class="plus" data-team="B" data-d="1" title="Award a point">+</button></div>
+    </div>
+    <button class="iconbtn" id="soundBtn" title="Sound on or off">🔊</button>
+    <button class="iconbtn" id="fsBtn" title="Full screen">⛶</button>
+  </header>
+
+  <main>
+    <section class="screen active" id="screen-board">
+      <h2 id="boardTitle">The case board</h2>
+      <p class="sub">Every folder holds one word. Open it, study the picture, read the statement, then let the class guess before the redaction lifts.</p>
+      <div class="board-grid" id="boardGrid"></div>
+    </section>
+
+    <section class="screen" id="screen-gaps">
+      <h2>Fill the gaps</h2>
+      <p class="sub">Pick a word from the bank, then tap the gap where it belongs. Tap a filled gap to send the word back.</p>
+      <div class="row" style="margin-top:14px">
+        <div class="segbar" id="gapParts"></div>
+        <button class="btn" id="checkGaps">Check answers</button>
+        <button class="btn ghost" id="resetGaps">Clear</button>
+        <span class="score" id="gapScore"></span>
+      </div>
+      <div class="panel">
+        <h4 class="tlabel">WORD BANK</h4>
+        <div class="bank" id="gapBank"></div>
+      </div>
+      <div class="qlist" id="gapList"></div>
+    </section>
+
+    <section class="screen" id="screen-string">
+      <h2>Red string</h2>
+      <p class="sub">Tap a word on the left, then its synonym on the right. Every correct pair pins a string across the board.</p>
+      <div class="row" style="margin-top:14px">
+        <div class="segbar" id="stringRounds"></div>
+        <button class="btn ghost" id="resetString">Shuffle this round</button>
+        <span class="score" id="stringScore"></span>
+      </div>
+      <div class="stringwrap" id="stringWrap">
+        <svg id="strings"></svg>
+        <div class="cols">
+          <div><h4 class="tlabel">THE WORD</h4><div class="pinlist" id="leftCol"></div></div>
+          <div><h4 class="tlabel">ITS SYNONYM</h4><div class="pinlist" id="rightCol"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-quick">
+      <h2>Quick fire</h2>
+      <p class="sub">A meaning appears. First hand up names the word. Tap the answer on the board, then award the point.</p>
+      <div class="qf">
+        <div class="prompt" id="qfPrompt"><div><small>ROUND READY</small>Press “Next question” to begin.</div></div>
+        <div class="opts" id="qfOpts"></div>
+        <div class="meta">
+          <div class="row">
+            <button class="btn" id="qfNext">Next question</button>
+            <span class="score" id="qfScore">0 asked</span>
+          </div>
+          <span class="award" id="qfAward" style="visibility:hidden">Award the point:
+            <button data-team="A">Team A</button><button data-team="B">Team B</button>
+          </span>
+          <span class="qtimer" id="qfTimer">15</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-scramble">
+      <h2>Word scramble</h2>
+      <p class="sub">The letters are mixed up. Read the meaning, then tap the letters in the right order to rebuild the word.</p>
+      <div class="scr">
+        <div class="hint" id="scrHint"><small>MEANING</small>Press “New word” to start.</div>
+        <div class="tiles" id="scrTiles"></div>
+        <div class="answer" id="scrAnswer"></div>
+        <div class="row" style="justify-content:center;margin-top:16px">
+          <button class="btn" id="scrNew">New word</button>
+          <button class="btn ghost" id="scrUndo">Undo letter</button>
+          <button class="btn ghost" id="scrReveal">Show me</button>
+          <span class="score" id="scrScore">0 solved</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-bingo">
+      <h2>Vocabulary bingo</h2>
+      <p class="sub">Read out a clue, and the class crosses the word off their own card. Tap a square here to cross it off on the board. A full row or column wins.</p>
+      <div class="bingo-layout">
+        <div><div class="bingo" id="bingoGrid"></div></div>
+        <div>
+          <div class="caller">
+            <p class="kind" id="clueKind">READY</p>
+            <p class="clue" id="clueText">Press “Call a clue” to start the round.</p>
+          </div>
+          <div class="row" style="margin-top:14px">
+            <button class="btn" id="callBtn">Call a clue</button>
+            <button class="btn ghost" id="newCard">New card</button>
+          </div>
+          <p class="score" id="calledCount" style="margin-top:12px">0 clues called</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-charades">
+      <h2>Vocabulary charades</h2>
+      <p class="sub">One detective comes to the board and peeks at the secret word. No talking — only a face and a body. Whoever guesses it acts next.</p>
+      <div class="actcard" id="actCard">
+        <p class="back">SECRET WORD CARD</p>
+        <p class="big">Tap to peek</p>
+        <p class="back">only the actor should look</p>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:16px">
+        <button class="btn" id="peekBtn">Draw a card</button>
+        <button class="btn ghost" id="timerBtn">Start 60 seconds</button>
+      </div>
+      <p class="timer" id="charTimer">60</p>
+      <div class="rules">
+        <div class="rule"><span>STEP 1</span>Draw a secret word from the list.</div>
+        <div class="rule"><span>STEP 2</span>Act it out with your face and body only.</div>
+        <div class="rule"><span>STEP 3</span>Classmates raise a hand to guess.</div>
+        <div class="rule"><span>STEP 4</span>The correct guesser acts next.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-closed">
+      <div class="finale">
+        <p class="eyebrow" style="font-family:var(--type);letter-spacing:.24em;color:var(--accent);font-size:13px">FILE STATUS</p>
+        <h2 class="big" style="font-family:var(--display)">Case closed</h2>
+        <p class="sub" style="margin:14px auto 0;text-align:center" id="finaleText"></p>
+        <div class="wordwall" id="wordWall"></div>
+        <div class="row" style="justify-content:center;margin-top:26px">
+          <button class="btn" id="celebrate">Celebrate</button>
+          <button class="btn ghost" id="nextList">Open the next list</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="tab on" data-screen="board">🗂 Case board</button>
+    <button class="tab" data-screen="gaps">✏️ Fill the gaps</button>
+    <button class="tab" data-screen="string">🧵 Red string</button>
+    <button class="tab" data-screen="quick">⚡ Quick fire</button>
+    <button class="tab" data-screen="scramble">🔠 Scramble</button>
+    <button class="tab" data-screen="bingo">🎲 Bingo</button>
+    <button class="tab" data-screen="charades">🎭 Charades</button>
+    <button class="tab" data-screen="closed">🏆 Case closed</button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="file" role="dialog" aria-modal="true" aria-label="Case file">
+    <button class="close" id="closeFile" title="Close the file">✕</button>
+    <p class="filehead" id="fileHead"></p>
+    <div class="evidence">
+      <div class="photo" id="filePhoto"></div>
+      <div class="statement">
+        <p class="lbl">WITNESS STATEMENT</p>
+        <p class="sentence" id="fileSentence"></p>
+      </div>
+    </div>
+    <p class="ask">Talk with your partner. What do you think this word means?</p>
+    <button class="revealbtn" id="revealBtn">Reveal the evidence</button>
+    <div class="solution" id="solution">
+      <p class="theword" id="solWord"></p>
+      <span class="pos" id="solPos"></span>
+      <p class="definition" id="solDef"></p>
+      <div class="synant">
+        <div><h4>✅ SYNONYMS</h4><p id="solSyn"></p></div>
+        <div><h4>🚫 ANTONYMS</h4><p id="solAnt"></p></div>
+      </div>
+    </div>
+    <div class="filenav">
+      <button class="navbtn" id="prevCase">← Previous file</button>
+      <button class="navbtn primary" id="nextCase">Next file →</button>
+      <span class="hintkeys">← → to move · SPACE to reveal · ESC to close</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+
+/* ============ DATA ============ */
+/* W(word, part of speech, emoji, case sentence, meaning, synonyms, antonyms, red-string match, practice sentence with ___) */
+function W(word,pos,emoji,sentence,def,syn,ant,match,practice){
+  return {word:word,pos:pos,emoji:emoji,sentence:sentence,def:def,syn:syn,ant:ant,match:match,practice:practice};
+}
+
+var LISTS = [
+{ id:"one", name:"List One", pages:"Welcome deck", emoji:"🔍", accent:"#f0bf4c", accentDk:"#c99a2e", glow:"rgba(240,191,76,.18)", folder:"#f1e3c3", folderDk:"#d8c48f",
+  words:[
+  W("Pristine","adjective","❄️","The snow in the mountains was pristine, without a single footprint in sight.","In perfect condition; completely clean, new, or unspoiled.","pure, spotless, immaculate, untouched","dirty, filthy, ruined, spoiled","Spotless","The hikers were amazed by the ___ lake, its water crystal clear and untouched."),
+  W("Grimacing","verb","😬","She was grimacing as she tasted the extremely sour lemon.","Twisting your face to show pain, disgust, or disapproval.","wincing, scowling, frowning","smiling, beaming, grinning","Wincing","He was ___ in pain after stubbing his toe on the table leg."),
+  W("Abandon","verb","🚢","The sailors had to abandon the sinking ship and jump into the lifeboats.","To leave someone or something completely and suddenly.","desert, forsake, leave, ditch","keep, maintain, stay with, retain","Desert","After winning the lottery, he decided to ___ his tiny old apartment for a bigger house."),
+  W("Sarcastic","adjective","🙄","\u201COh great, another pop quiz,\u201D he said in a sarcastic voice, rolling his eyes.","Saying something that means the opposite of what you feel, usually to mock or tease.","mocking, sardonic, ironic, sneering","sincere, genuine, earnest","Mocking","\u201CWow, I just love doing homework on weekends,\u201D she said in a ___ tone."),
+  W("Agonize","verb","😖","Mia began to agonize over which two books to choose from the library shelf.","To feel or show great worry when trying to make a decision.","worry, fret, struggle, deliberate","relax, ignore, dismiss","Struggle","Please don\u2019t ___ over this decision \u2014 both choices are actually good!"),
+  W("Forlorn","adjective","😔","The forlorn puppy sat by the door, waiting for its owner to return.","Sad and lonely, especially from being left alone.","miserable, lonely, sorrowful, desolate","joyful, cheerful, content","Miserable","Losing the championship left the whole team feeling ___ and defeated."),
+  W("Cordoned","verb","🚧","Police cordoned off the street after the accident so no cars could pass.","Closed off an area with a barrier so people cannot enter.","enclosed, sealed off, blocked off, fenced","opened, unblocked, exposed","Sealed off","The area around the fallen tree was ___ off to keep visitors safe."),
+  W("Assumption","noun","💭","I made the assumption that the store was open, but it turned out to be closed.","Something believed to be true without any proof.","guess, presumption, belief, hypothesis","fact, proof, certainty","Guess","My little sister made an ___ that I ate her last cookie, but it wasn\u2019t me."),
+  W("Authentic","adjective","🏺","The museum displayed an authentic piece of ancient Egyptian pottery, not a replica.","Genuine and real; not a copy or a fake.","genuine, real, original, true","fake, artificial, counterfeit, imitation","Genuine","The chef proudly served an ___ Italian pizza, made from a recipe from Naples."),
+  W("Oblivious","adjective","🎧","He was completely oblivious to his surroundings and walked right past his best friend.","Not aware of or not noticing what is happening around you.","unaware, unmindful, distracted, inattentive","aware, alert, attentive, mindful","Unaware","Texting on his phone, he was completely ___ to the beautiful sunset around him."),
+  W("Bewildered","adjective","😕","The tourist looked bewildered as he tried to read the map upside down.","Completely confused or puzzled.","confused, puzzled, perplexed, baffled","enlightened, informed, certain","Confused","The new student looked ___ on his first day, unsure which classroom to enter.")
+]},
+{ id:"two", name:"List Two", pages:"Booklet page 3", emoji:"🏆", accent:"#ff7a59", accentDk:"#c9502f", glow:"rgba(255,122,89,.2)", folder:"#ffd9c9", folderDk:"#e8a98d",
+  words:[
+  W("Pivotal","adjective","🔑","The last goal was pivotal; it decided who won the championship.","Very important and central.","crucial, key, central, vital","minor, unimportant, trivial","Crucial","Reading every day was ___ to improving her English."),
+  W("Frail","adjective","🧓","The frail old man leaned on his cane as he crossed the road.","Not strong or healthy, extremely weak.","weak, fragile, delicate","strong, sturdy, robust","Weak","After the long illness, the kitten was thin and ___."),
+  W("Detour","noun","🛣️","Because the bridge was closed, we took a detour through the village.","A long or roundabout route taken to avoid something or to visit somewhere along the way.","diversion, roundabout route, bypass","direct route, shortcut","Diversion","The roadworks forced the bus to take a ___ around the market."),
+  W("Diminish","verb","📉","The noise began to diminish as the crowd left the stadium.","Make or become less.","decrease, reduce, lessen, shrink","increase, grow, expand","Decrease","The pain in his knee started to ___ after he rested."),
+  W("Scandalize","verb","😱","The rude joke seemed to scandalize the guests at the wedding.","Shock or horrify someone by a real or imagined violation of propriety or morality.","shock, horrify, outrage, offend","please, impress, delight","Shock","The noisy students managed to ___ the strict librarian."),
+  W("Benevolent","adjective","🤲","The benevolent doctor treated poor patients for free.","Kind and generous; helpful; charitable.","kind, generous, caring, charitable","cruel, selfish, unkind","Kind","A ___ neighbour brought food to every family on the street."),
+  W("Etiquette","noun","🍽️","Good etiquette means saying please and thank you at the table.","Polite behaviour in society.","manners, politeness, courtesy","rudeness, bad manners","Manners","Turning off your phone in the cinema is simple ___."),
+  W("Tournament","noun","🏆","Eight schools played in the football tournament last weekend.","A series of contests between a number of competitors, competing for an overall prize.","competition, contest, championship","friendly match, practice game","Competition","Our chess club will host a ___ in November."),
+  W("Hobble","verb","🩼","After twisting his ankle, he had to hobble back to the classroom.","To walk with difficulty because your feet or legs are hurt.","limp, stagger, shuffle","stride, run, march","Limp","The injured horse could only ___ across the field."),
+  W("Eradicate","verb","🧹","Doctors are working to eradicate the disease from the whole country.","To eliminate or get rid of something completely.","eliminate, wipe out, remove, destroy","create, spread, keep","Eliminate","The farmer tried to ___ the weeds from his field."),
+  W("Annoyed","adjective","😤","She was annoyed when her brother kept interrupting her.","Extremely angry.","irritated, bothered, cross","pleased, calm, content","Irritated","He was ___ that the bus was late again."),
+  W("Apologize","verb","🙏","You should apologize to Sara for breaking her pencil.","To express regret for something wrong done.","say sorry, express regret","blame, accuse, defend","Say sorry","The boy had to ___ for shouting in class."),
+  W("Opponents","noun","🥊","Our opponents in the final were the strongest team in the city.","Someone who competes with or opposes another in a contest, game, or argument.","rivals, competitors, adversaries","teammates, allies, partners","Rivals","The two ___ shook hands before the match."),
+  W("Premises","noun","🏢","No one is allowed on the school premises after six o\u2019clock.","A building and the land that surrounds it.","property, building, grounds, site","outside, elsewhere","Property","The guard checked everyone entering the factory ___."),
+  W("Incredible","adjective","🤩","The magician\u2019s trick was so incredible that nobody could explain it.","Extraordinary; difficult to believe.","unbelievable, amazing, extraordinary","ordinary, believable, normal","Amazing","It was ___ that the tiny ant could carry a leaf so big."),
+  W("Triumphant","adjective","🥇","The triumphant team lifted the trophy high above their heads.","Having won a battle or contest; victorious.","victorious, winning, successful","defeated, beaten, losing","Victorious","She gave a ___ smile as she crossed the finish line first."),
+  W("Humiliated","adjective","😳","He felt humiliated when he fell over in front of the whole class.","Insulted; made to feel ashamed and foolish by injury to dignity and pride.","ashamed, embarrassed, disgraced","proud, honoured, respected","Embarrassed","The goalkeeper felt ___ after letting in five goals.")
+]},
+{ id:"three", name:"List Three", pages:"Booklet page 6", emoji:"🌟", accent:"#3fd0b6", accentDk:"#2a9a86", glow:"rgba(63,208,182,.2)", folder:"#cff4ec", folderDk:"#8fd3c6",
+  words:[
+  W("Dominate","verb","👑","Our team hopes to dominate the league this season.","Govern; control; dictate; command.","control, command, rule","follow, submit, obey","Control","One loud voice should not ___ the whole discussion."),
+  W("Meager","adjective","🍚","The travellers shared a meager meal of bread and water.","Insufficient; paltry; scanty.","scanty, insufficient, small","adequate, ample, abundant","Scanty","The ___ rain was not enough to save the crops."),
+  W("Accumulate","verb","🪙","Dust began to accumulate on the old books in the corner.","Collect; accrue; assemble.","collect, gather, pile up","scatter, decrease, disperse","Collect","If you save a little every week, the money will ___ quickly."),
+  W("Abundance","noun","🍎","The orchard had an abundance of apples this autumn.","Plenty; plethora; myriad.","plenty, wealth, plethora","paucity, scarcity, little","Plenty","The desert has an ___ of sand but very little water."),
+  W("Boisterous","adjective","🎉","The boisterous children raced around the playground shouting.","Clamorous, raucous, rambunctious, noisy.","noisy, rowdy, lively, raucous","calm, serene, subdued, quiet","Rowdy","The ___ fans cheered so loudly that we could not hear the coach."),
+  W("Prominent","adjective","🌟","A prominent scientist visited our school to talk about space.","Conspicuous, well known, renowned, eminent.","famous, well-known, eminent","common, inconspicuous, unknown","Famous","The clock tower is the most ___ building in the town."),
+  W("Consequence","noun","⚖️","Missing the bus was the consequence of waking up late.","Repercussion, result, effect.","result, effect, outcome","cause, reason, origin","Result","Every choice has a ___, good or bad."),
+  W("Monotonous","adjective","😴","The monotonous hum of the fan made everyone sleepy.","Boring, repetitive, mundane.","boring, dull, repetitive","exciting, eventful, interesting","Dull","Copying the same line fifty times is a ___ task."),
+  W("Deteriorate","verb","🏚️","The old bridge continued to deteriorate until it was unsafe to cross.","Decline, disintegrate, wear out; to make or become worse.","worsen, decline, decay","improve, recover, strengthen","Worsen","Fruit will ___ quickly if you leave it in the sun."),
+  W("Unanimous","adjective","🙌","The vote was unanimous; every student chose the beach trip.","In complete agreement, unified.","united, agreed, in agreement","divided, split, disagreeing","United","The judges were ___ that her painting deserved first prize."),
+  W("Hazardous","adjective","☢️","Wet floors are hazardous, so walk slowly and carefully.","Risky, perilous, precarious, unsafe.","dangerous, risky, unsafe","secure, safe, harmless","Dangerous","Chemicals in the lab can be ___ if they are not handled properly."),
+  W("Oblivious","adjective","🎧","He was completely oblivious to his surroundings and walked right past his best friend.","Unconscious, unaware, inattentive.","unaware, unmindful, inattentive","aware, alert, attentive","Unaware","Lost in her book, she was ___ to the bell ringing."),
+  W("Ominous","adjective","🌩️","Ominous black clouds gathered over the sea before the storm.","Spooky, haunting, apocalyptic.","threatening, sinister, menacing","promising, reassuring, hopeful","Threatening","The ___ silence in the hallway made us nervous."),
+  W("Abandon","verb","🚢","The sailors had to abandon the sinking ship and jump into the lifeboats.","To leave completely, to desert.","desert, forsake, leave","keep, stay with, retain","Desert","The explorers had to ___ their camp when the river flooded.")
+]},
+{ id:"four", name:"List Four", pages:"Booklet pages 9\u201310", emoji:"🦎", accent:"#b58cff", accentDk:"#8358d4", glow:"rgba(181,140,255,.22)", folder:"#e6dcff", folderDk:"#bba6ec",
+  words:[
+  W("Ambiguous","adjective","❓","The teacher\u2019s ambiguous instructions left us unsure which page to read.","Cryptic; unclear.","unclear, vague, cryptic","explicit, clear, precise","Unclear","His answer was so ___ that nobody knew if he meant yes or no."),
+  W("Catastrophe","noun","🌊","The flood was a catastrophe that destroyed hundreds of homes.","Disaster; mishap; fiasco.","disaster, calamity, tragedy","success, blessing, triumph","Disaster","Forgetting the tickets at home turned the trip into a ___."),
+  W("Ascend","verb","🧗","The hikers began to ascend the steep mountain path at dawn.","To mount; to rise.","climb, rise, go up","descend, plummet, fall","Climb","The hot-air balloon started to ___ slowly into the sky."),
+  W("Camaraderie","noun","🤝","There was great camaraderie among the players after the long season.","A spirit of friendly good fellowship.","friendship, fellowship, team spirit","hostility, rivalry, loneliness","Fellowship","The scouts built real ___ during their camping week."),
+  W("Amicable","adjective","😊","The two neighbours reached an amicable agreement about the fence.","Cordial; friendly; peaceful.","friendly, cordial, peaceful","hostile, unfriendly, animosity","Friendly","After the argument, they had an ___ talk and shook hands."),
+  W("Authentic","adjective","🏺","The museum displayed an authentic piece of ancient Egyptian pottery, not a replica.","Genuine; real; verified; trustworthy.","genuine, real, verified","copied, dubious, implausible","Genuine","The shop sells ___ Arabian coffee, not the instant kind."),
+  W("Candor","noun","🗣️","I admire her candor; she always says exactly what she thinks.","Frankness; sincerity; impartiality.","honesty, frankness, openness","deceit, insincerity, partiality","Honesty","With surprising ___, he admitted that he had not studied."),
+  W("Camouflage","verb","🦎","The chameleon can camouflage itself by changing its colour.","Obscure; conceal; hide.","hide, conceal, disguise","expose, reveal, show","Conceal","Soldiers ___ their tents with branches and leaves."),
+  W("Boisterous","adjective","🎉","The boisterous children raced around the playground shouting.","Noisy; naughty; raucous; rambunctious; vociferous.","noisy, rowdy, raucous","calm, composed, well-behaved, quiet","Rowdy","The teacher asked the ___ class to settle down."),
+  W("Bewildered","adjective","😕","The tourist looked bewildered as he tried to read the map upside down.","Baffled; astonished; perplexed; flabbergasted.","baffled, perplexed, confused","certain, informed, clear-headed","Baffled","The new student looked ___ on his first day, unsure which room to enter."),
+  W("Audacity","noun","🦁","It took real audacity to stand up and disagree with the coach.","Boldness; courage; daring.","boldness, daring, courage","timidity, shyness, cowardice","Boldness","She had the ___ to ask the famous author for a photo."),
+  W("Canter","verb","🐎","The horse began to canter gently across the open field.","An easy gallop like that of a horse.","trot, gentle gallop, lope","halt, stop, walk","Gallop","The riders let their ponies ___ along the beach.")
+]},
+{ id:"five", name:"List Five", pages:"Booklet pages 12\u201313", emoji:"💪", accent:"#ffb347", accentDk:"#d2882a", glow:"rgba(255,179,71,.2)", folder:"#ffe7c2", folderDk:"#e5bf82",
+  words:[
+  W("Traditional","adjective","🕌","We wore traditional clothes for the National Day celebration.","Conventional; historic.","conventional, historic, customary","modern, contemporary, new","Conventional","Kabsa is a ___ dish served at family gatherings."),
+  W("Humility","noun","🙇","Despite winning every prize, she accepted the award with humility.","The quality of being humble; a modest opinion of one\u2019s own importance.","modesty, humbleness","pride, arrogance, vanity","Modesty","The champion showed ___ by praising his opponent."),
+  W("Neglect","verb","🥀","If you neglect your plants, they will soon wilt and die.","To pay no attention or too little attention to.","ignore, overlook, forget","care for, attend to, nurture","Ignore","Don\u2019t ___ your homework just because the weekend is long."),
+  W("Poverty","noun","🪙","Many families in the village lived in poverty after the drought.","The state of having little or no money, goods, or means of support.","hardship, need, want","wealth, riches, prosperity","Hardship","The charity works to reduce ___ in the region."),
+  W("Grim","adjective","🌑","The doctor\u2019s grim expression told us the news was bad.","Serious; morbid; sinister; ominous.","serious, gloomy, bleak","joyous, cheerful, bright","Gloomy","The abandoned house looked ___ under the grey sky."),
+  W("Ignorance","noun","🙈","His ignorance of the rules cost the team a penalty.","Lack of knowledge, information, or education.","unawareness, inexperience","knowledge, wisdom, understanding","Unawareness","___ of the law is not an excuse for breaking it."),
+  W("Determination","noun","💪","With great determination, she practised until she could swim a full lap.","The quality of being resolute; firmness of purpose.","resolve, persistence, willpower","weakness, hesitation, indecision","Persistence","It takes ___ to finish a marathon."),
+  W("Desperately","adverb","🆘","The lost hiker desperately needed water.","Having an urgent need.","urgently, frantically, badly","calmly, casually, mildly","Urgently","The team ___ needed one more goal to win."),
+  W("Proclaiming","verb","📣","The mayor stood on the steps proclaiming the start of the festival.","Declaring; announcing.","declaring, announcing, stating","hiding, concealing, whispering","Announcing","Posters were ___ the opening of the new library."),
+  W("Survivors","noun","🛟","Rescue boats searched the sea for survivors of the shipwreck.","A person or thing that survives; continues to function despite ordeals.","those who lived, the remaining","victims, casualties","Those who lived","The ___ of the earthquake were given tents and food."),
+  W("Vaunt","verb","🎺","He likes to vaunt his high marks to everyone in class.","Boast; brag.","boast, brag, show off","be modest, downplay","Boast","Please don\u2019t ___ about your new phone in front of everyone."),
+  W("Decent","adjective","👔","He is a decent boy who always helps his younger brother.","Prudent; honourable; respectable.","respectable, honourable, proper","obnoxious, indecent, improper","Respectable","Wear ___ clothes for the school photo."),
+  W("Pervading","verb","🌫️","A smell of fresh bread was pervading the whole house.","To spread; to fill.","spreading, filling, permeating","emptying, evacuating, hollow","Spreading","Excitement was ___ the stadium before kick-off."),
+  W("Excursions","noun","🚌","Our class goes on excursions to the museum every term.","A short trip or outing, usually for a special purpose and a prompt return.","trips, outings, journeys","staying in, staying home","Outings","The school organises ___ to the Red Sea coast each spring.")
+]},
+{ id:"six", name:"List Six", pages:"Booklet page 14", emoji:"🌿", accent:"#5ec8ff", accentDk:"#3492c4", glow:"rgba(94,200,255,.22)", folder:"#d5efff", folderDk:"#9ccdea",
+  words:[
+  W("Rasping","adjective","🪚","The rasping sound of the saw echoed through the workshop.","Making a harsh, grating sound, as of something rough being scraped.","harsh, grating, scratchy","smooth, soft, gentle","Harsh","His ___ cough kept everyone awake."),
+  W("Smothering","verb","🛏️","The thick smoke was smothering the flames in the fireplace.","Covering or surrounding so as to block air, light, or sound; suffocating.","suffocating, covering, stifling","airing, freeing, uncovering","Suffocating","The heavy blanket felt like it was ___ me on the hot night."),
+  W("Acrid","adjective","🔥","An acrid smell of burnt plastic filled the air.","Sharp, bitter, and unpleasant in smell or taste.","bitter, sharp, harsh","sweet, pleasant, mild","Bitter","The ___ smoke from the tyres stung our eyes."),
+  W("Aromatic","adjective","🌿","The aromatic herbs made the whole kitchen smell wonderful.","Having a pleasant, distinctive smell.","fragrant, sweet-smelling, perfumed","smelly, foul, odourless","Fragrant","She added ___ spices like cinnamon and cardamom to the tea."),
+  W("Murmured","verb","🤫","He murmured an answer so quietly that the teacher asked him to repeat it.","Said something in a soft, low, and indistinct voice.","whispered, muttered, mumbled","shouted, yelled, announced","Whispered","The audience ___ in surprise when the lights went out."),
+  W("Acknowledged","verb","✅","She acknowledged her mistake and promised to fix it.","Accepted or admitted the existence, truth, or reality of something.","admitted, accepted, recognised","denied, ignored, rejected","Admitted","The coach ___ that the other team had played better.")
+]},
+{ id:"seven", name:"List Seven", pages:"Booklet page 16", emoji:"✨", accent:"#ff8ad4", accentDk:"#c85aa3", glow:"rgba(255,138,212,.22)", folder:"#ffdbf1", folderDk:"#e7a3ce",
+  words:[
+  W("Precise","adjective","🎯","The scientist took precise measurements before starting the experiment.","Exact and accurate; clearly stated or defined.","exact, accurate, specific","vague, rough, inaccurate","Exact","Give me the ___ time the train leaves."),
+  W("Intimate","adjective","👯","They have been intimate friends since kindergarten.","Closely personal or familiar; having a close relationship.","close, personal, familiar","distant, formal, unfamiliar","Close","She shared the secret only with her most ___ friend."),
+  W("Unique","adjective","🦄","Every snowflake has a unique pattern.","Being the only one of its kind; unlike anything else.","one of a kind, special, unmatched","common, ordinary, typical","One of a kind","The artist\u2019s style is so ___ that you recognise it instantly."),
+  W("Lamentable","adjective","😢","The team\u2019s lamentable performance left the fans disappointed.","Regrettable or deplorable; causing sorrow.","regrettable, deplorable, terrible","admirable, excellent, praiseworthy","Regrettable","It is ___ that so much food is wasted every day."),
+  W("Infinite","adjective","♾️","On a clear night the desert sky seems infinite.","Without limits or end; boundless.","endless, limitless, boundless","limited, finite, small","Endless","A good teacher needs ___ patience."),
+  W("Clambering","verb","🧗","The children were clambering over the rocks to reach the beach.","Climbing or moving with difficulty, using hands and feet.","climbing, scrambling, crawling","sliding, descending, strolling","Scrambling","We saw goats ___ up the steep hillside."),
+  W("Endeavoring","verb","🏃","She is endeavoring to learn three new words every day.","Trying hard to achieve or do something.","trying, striving, attempting","giving up, quitting, neglecting","Striving","The engineers are ___ to fix the problem before tonight."),
+  W("Dismay","noun","😟","To our dismay, the match was cancelled because of the sandstorm.","A strong feeling of worry, disappointment, or discouragement.","worry, disappointment, alarm","relief, joy, delight","Disappointment","She looked at her low test score with ___."),
+  W("Hover","verb","🚁","A hummingbird can hover in front of a flower while it drinks.","To stay suspended or float in one place in the air.","float, hang, linger","land, settle, drop","Float","The drone began to ___ above the football pitch."),
+  W("Quench","verb","💧","A glass of cold water will quench your thirst after the race.","To satisfy thirst, or to put out a fire.","satisfy, extinguish, put out","ignite, fuel, worsen","Satisfy","Firefighters worked all night to ___ the flames."),
+  W("Combustible","adjective","🧨","Keep combustible materials like paper away from the stove.","Capable of catching fire and burning easily.","flammable, burnable, inflammable","fireproof, non-flammable","Flammable","Dry grass is highly ___ in the summer heat."),
+  W("Extraordinary","adjective","✨","Her extraordinary memory lets her recite whole poems after one reading.","Very unusual or remarkable; beyond what is ordinary.","remarkable, amazing, exceptional","ordinary, common, usual","Remarkable","It was an ___ achievement to climb the mountain in one day.")
+]}
+];
+
+var RANKS = [{at:0,name:"Cadet"},{at:.25,name:"Junior Detective"},{at:.5,name:"Inspector"},{at:.8,name:"Chief Inspector"},{at:1,name:"Master Detective"}];
+
+/* ============ STATE ============ */
+var LI = 0;                 /* active list index */
+var solvedBy = {};          /* list id -> array of solved word indexes */
+var current = 0;
+var teams = {A:0,B:0};
+var soundOn = true;
+var gapPart = 0, gapPick = null, gapFill = {}, bankOrder = {};
+var stringRound = 0, stringSel = null, stringLinked = [], stringPairs = [];
+var bingoCols = 4, bingoCalled = [];
+var qfAsked = 0, qfTimerId = null, qfLeft = 15, qfAnswer = null;
+var scrWord = null, scrPlaced = [], scrSolved = 0;
+var charTimerId = null, charLeft = 60, charWord = null;
+
+function L(){ return LISTS[LI]; }
+function WORDS(){ return LISTS[LI].words; }
+function solved(){ if(!solvedBy[L().id]) solvedBy[L().id] = []; return solvedBy[L().id]; }
+
+/* ============ SOUND ============ */
+var actx = null;
+function tone(freq,dur,type,vol){
+  if(!soundOn) return;
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = type||"sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol||0.13, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function sGood(){ tone(660,.12,"triangle"); setTimeout(function(){tone(880,.2,"triangle");},95); }
+function sBad(){ tone(200,.22,"sawtooth",.09); }
+function sStamp(){ tone(150,.1,"square",.11); setTimeout(function(){tone(90,.16,"square",.09);},60); }
+function sClick(){ tone(520,.05,"sine",.07); }
+function sWin(){ [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){tone(f,.26,"triangle");}, i*115); }); }
+
+/* ============ HELPERS ============ */
+function $(id){ return document.getElementById(id); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pad(n){ return (n<10?"0":"")+n; }
+function each(list,fn){ Array.prototype.forEach.call(list,fn); }
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove("show");},2200); }
+function chunk(n,max){ var parts=Math.ceil(n/max), base=Math.floor(n/parts), rem=n%parts, out=[], i=0; for(var p=0;p<parts;p++){ var size=base+(p<rem?1:0); out.push([i,i+size]); i+=size; } return out; }
+
+/* ============ THEME + LIST SWITCH ============ */
+function applyTheme(){
+  var l = L(), r = document.documentElement.style;
+  r.setProperty("--accent", l.accent); r.setProperty("--accent-dk", l.accentDk); r.setProperty("--glow", l.glow);
+}
+function selectList(i){
+  LI = i; applyTheme();
+  $("listChip").innerHTML = L().name + " <small>\u00B7 change</small>";
+  $("boardTitle").textContent = "The case board \u2014 " + L().name;
+  gapPart = 0; gapPick = null; stringRound = 0; qfAsked = 0; scrSolved = 0;
+  stopQfTimer(); stopCharTimer();
+  buildBoard(); buildGapParts(); buildStringRounds(); buildQuick(true); buildScrambleIdle(); buildBingo(); buildWall();
+  $("picker").classList.remove("open");
+  go("board");
+}
+function buildPicker(){
+  var f = $("folders"); f.innerHTML = "";
+  LISTS.forEach(function(l,i){
+    var s = solvedBy[l.id] ? solvedBy[l.id].length : 0, n = l.words.length;
+    var b = document.createElement("button");
+    b.className = "folder" + (s===n ? " complete" : "");
+    b.style.setProperty("--fc", l.folder); b.style.setProperty("--fd", l.folderDk);
+    var sample = l.words.slice(0,4).map(function(w){ return w.word.toLowerCase(); }).join(" \u00B7 ");
+    b.innerHTML =
+      '<span class="emo">'+l.emoji+'</span>' +
+      '<p class="num">CASE FILE '+pad(i+1)+'</p>' +
+      '<p class="name">'+l.name+'</p>' +
+      '<p class="pages">'+l.pages+'</p>' +
+      '<p class="sample">'+sample+' \u2026</p>' +
+      '<span class="done">ALL CLOSED</span>' +
+      '<div class="foot"><span>'+n+' words</span><span>'+s+' closed</span></div>' +
+      '<div class="pbar"><i style="width:'+(s/n*100)+'%"></i></div>';
+    b.addEventListener("click", function(){ sClick(); selectList(i); });
+    f.appendChild(b);
+  });
+}
+$("listChip").addEventListener("click", function(){ buildPicker(); $("picker").classList.add("open"); sClick(); });
+$("nextList").addEventListener("click", function(){ selectList((LI+1)%LISTS.length); });
+
+/* ============ HEADER ============ */
+function updateProgress(){
+  var n = solved().length, tot = WORDS().length, frac = tot ? n/tot : 0;
+  $("progFill").style.width = (frac*100)+"%";
+  $("progText").textContent = n+"/"+tot;
+  var r = RANKS[0].name;
+  for(var i=0;i<RANKS.length;i++){ if(frac >= RANKS[i].at) r = RANKS[i].name; }
+  $("rankChip").textContent = "Rank: "+r;
+}
+function award(k){ teams[k]++; $("t"+k+"score").textContent = teams[k]; sGood(); }
+each(document.querySelectorAll(".team .plus,.team .minus"), function(b){
+  b.addEventListener("click", function(){
+    var k=b.getAttribute("data-team"); teams[k]=Math.max(0,teams[k]+parseInt(b.getAttribute("data-d"),10));
+    $("t"+k+"score").textContent=teams[k]; sClick();
+  });
+});
+$("tAname").addEventListener("click", function(){ renameTeam("tAname"); });
+$("tBname").addEventListener("click", function(){ renameTeam("tBname"); });
+function renameTeam(id){ var n=window.prompt("Team name:", $(id).textContent); if(n&&n.trim()){ $(id).textContent=n.trim().slice(0,14); syncAwardNames(); } }
+function syncAwardNames(){ each(document.querySelectorAll(".award button"), function(b){ b.textContent = $("t"+b.getAttribute("data-team")+"name").textContent; }); }
+$("soundBtn").addEventListener("click", function(){ soundOn=!soundOn; $("soundBtn").textContent = soundOn?"🔊":"🔇"; if(soundOn) sClick(); });
+$("fsBtn").addEventListener("click", function(){
+  if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+  else if(document.exitFullscreen) document.exitFullscreen();
+});
+
+/* ============ NAV ============ */
+each(document.querySelectorAll(".tab"), function(t){ t.addEventListener("click", function(){ go(t.getAttribute("data-screen")); }); });
+function go(name){
+  each(document.querySelectorAll(".screen"), function(s){ s.classList.remove("active"); });
+  each(document.querySelectorAll(".tab"), function(t){ t.classList.remove("on"); });
+  $("screen-"+name).classList.add("active");
+  var tab = document.querySelector('.tab[data-screen="'+name+'"]'); if(tab) tab.classList.add("on");
+  if(name==="string") setTimeout(drawStrings,60);
+}
+
+/* ============ CASE BOARD ============ */
+function buildBoard(){
+  var g=$("boardGrid"); g.innerHTML="";
+  WORDS().forEach(function(w,i){
+    var b=document.createElement("button"); b.className="case";
+    b.setAttribute("aria-label","Open case file "+(i+1));
+    b.innerHTML='<p class="no">FILE '+pad(i+1)+' / '+WORDS().length+'</p><p class="clue">'+w.emoji+'</p><p class="status">UNSOLVED</p><p class="word">'+w.word+'</p><span class="stamp">CLOSED</span>';
+    b.addEventListener("click", function(){ openCase(i); });
+    g.appendChild(b);
+  });
+  refreshBoard();
+}
+function refreshBoard(){
+  var cards=document.querySelectorAll("#boardGrid .case"), s=solved();
+  for(var i=0;i<cards.length;i++){ if(s.indexOf(i)>-1) cards[i].classList.add("done"); else cards[i].classList.remove("done"); }
+  updateProgress();
+}
+
+/* ============ CASE FILE ============ */
+function openCase(i){
+  current=i; var w=WORDS()[i], tot=WORDS().length;
+  $("fileHead").textContent="CASE FILE "+pad(i+1)+" OF "+tot+" \u00B7 "+(solved().indexOf(i)>-1?"CLOSED":"OPEN");
+  $("filePhoto").textContent=w.emoji;
+  var low=w.sentence.toLowerCase(), at=low.indexOf(w.word.toLowerCase());
+  var before = at>-1 ? w.sentence.slice(0,at) : w.sentence+" ";
+  var hit = at>-1 ? w.sentence.slice(at, at+w.word.length) : w.word.toLowerCase();
+  var after = at>-1 ? w.sentence.slice(at+w.word.length) : "";
+  $("fileSentence").innerHTML = before+'<span class="redact" id="redact" role="button" tabindex="0">'+hit+'</span>'+after;
+  var r=$("redact");
+  r.addEventListener("click", function(){ r.classList.add("shown"); sClick(); });
+  r.addEventListener("keydown", function(e){ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); r.classList.add("shown"); } });
+  $("solution").classList.remove("show"); $("revealBtn").style.display="";
+  $("solWord").textContent=w.word; $("solPos").textContent=w.pos.toUpperCase();
+  $("solDef").textContent=w.def; $("solSyn").textContent=w.syn; $("solAnt").textContent=w.ant;
+  $("overlay").classList.add("open"); $("revealBtn").focus(); sClick();
+}
+function revealCase(){
+  if($("solution").classList.contains("show")) return;
+  var r=$("redact"); if(r) r.classList.add("shown");
+  $("solution").classList.add("show"); $("revealBtn").style.display="none"; sStamp();
+  if(solved().indexOf(current)===-1){
+    solved().push(current); refreshBoard();
+    $("fileHead").textContent="CASE FILE "+pad(current+1)+" OF "+WORDS().length+" \u00B7 CLOSED";
+    if(solved().length===WORDS().length){ setTimeout(function(){ toast("Every case in "+L().name+" is closed!"); sWin(); burst(); },500); }
+  }
+}
+$("revealBtn").addEventListener("click", revealCase);
+$("closeFile").addEventListener("click", closeFile);
+$("overlay").addEventListener("click", function(e){ if(e.target===$("overlay")) closeFile(); });
+function closeFile(){ $("overlay").classList.remove("open"); }
+$("nextCase").addEventListener("click", function(){ openCase((current+1)%WORDS().length); });
+$("prevCase").addEventListener("click", function(){ openCase((current-1+WORDS().length)%WORDS().length); });
+document.addEventListener("keydown", function(e){
+  if(!$("overlay").classList.contains("open")) return;
+  if(e.key==="Escape") closeFile();
+  if(e.key==="ArrowRight") openCase((current+1)%WORDS().length);
+  if(e.key==="ArrowLeft") openCase((current-1+WORDS().length)%WORDS().length);
+  if(e.key===" " && e.target.id!=="redact"){ e.preventDefault(); revealCase(); }
+});
+
+/* ============ FILL THE GAPS ============ */
+function gapKey(){ return L().id+":"+gapPart; }
+function gapParts(){ return chunk(WORDS().length,5); }
+function buildGapParts(){
+  var bar=$("gapParts"); bar.innerHTML="";
+  gapParts().forEach(function(p,i){
+    var b=document.createElement("button"); b.className="seg"+(i===gapPart?" on":""); b.textContent="Part "+(i+1);
+    b.addEventListener("click", function(){ gapPart=i; gapPick=null; buildGapParts(); sClick(); });
+    bar.appendChild(b);
+  });
+  buildGaps();
+}
+function buildGaps(){
+  var rng=gapParts()[gapPart], items=WORDS().slice(rng[0],rng[1]), k=gapKey();
+  if(!gapFill[k]) gapFill[k]=items.map(function(){return null;});
+  if(!bankOrder[k]) bankOrder[k]=shuffle(items.map(function(w){return w.word.toLowerCase();}));
+  var bank=$("gapBank"); bank.innerHTML="";
+  bankOrder[k].forEach(function(w){
+    var c=document.createElement("button"); c.className="chip"; c.textContent=w;
+    if(gapFill[k].indexOf(w)>-1) c.classList.add("used");
+    if(gapPick===w) c.classList.add("sel");
+    c.addEventListener("click", function(){ gapPick=(gapPick===w)?null:w; sClick(); buildGaps(); });
+    bank.appendChild(c);
+  });
+  var list=$("gapList"); list.innerHTML="";
+  shuffledItems(k,items).forEach(function(it,idx){
+    var row=document.createElement("p"); row.className="q";
+    var val=gapFill[k][idx], parts=it.practice.split("___");
+    row.innerHTML='<span class="num">'+(idx+1)+'.</span><span>'+parts[0]+'<span class="blank'+(val?" filled":"")+'" data-i="'+idx+'">'+(val||"\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0")+'</span>'+(parts[1]||"")+'</span>';
+    list.appendChild(row);
+  });
+  each(list.querySelectorAll(".blank"), function(b){
+    b.addEventListener("click", function(){
+      var i=parseInt(b.getAttribute("data-i"),10);
+      if(gapFill[k][i]){ gapPick=null; gapFill[k][i]=null; }
+      else if(gapPick){ gapFill[k][i]=gapPick; gapPick=null; sClick(); }
+      buildGaps();
+    });
+  });
+  $("gapScore").textContent="";
+}
+var gapOrder={};
+function shuffledItems(k,items){ if(!gapOrder[k]) gapOrder[k]=shuffle(items); return gapOrder[k]; }
+$("checkGaps").addEventListener("click", function(){
+  var k=gapKey(), rng=gapParts()[gapPart], items=shuffledItems(k,WORDS().slice(rng[0],rng[1])), right=0;
+  var blanks=$("gapList").querySelectorAll(".blank");
+  items.forEach(function(it,i){
+    var b=blanks[i]; b.classList.remove("right","wrong");
+    if(gapFill[k][i]===it.word.toLowerCase()){ b.classList.add("right"); right++; }
+    else if(gapFill[k][i]){ b.classList.add("wrong"); }
+  });
+  $("gapScore").textContent=right+" of "+items.length+" correct";
+  if(right===items.length){ sWin(); toast("Every gap solved!"); } else if(right>0) sGood(); else sBad();
+});
+$("resetGaps").addEventListener("click", function(){ var k=gapKey(); gapFill[k]=null; gapOrder[k]=null; gapPick=null; buildGaps(); sClick(); });
+
+/* ============ RED STRING ============ */
+function stringRoundsList(){ return chunk(WORDS().length,6); }
+function buildStringRounds(){
+  var bar=$("stringRounds"); bar.innerHTML="";
+  stringRoundsList().forEach(function(p,i){
+    var b=document.createElement("button"); b.className="seg"+(i===stringRound?" on":""); b.textContent="Round "+(i+1);
+    b.addEventListener("click", function(){ stringRound=i; buildStringRounds(); sClick(); });
+    bar.appendChild(b);
+  });
+  buildString();
+}
+function buildString(){
+  stringSel=null; stringLinked=[];
+  var rng=stringRoundsList()[stringRound];
+  stringPairs=WORDS().slice(rng[0],rng[1]);
+  var Lc=$("leftCol"), R=$("rightCol"); Lc.innerHTML=""; R.innerHTML="";
+  stringPairs.forEach(function(w,i){
+    var b=document.createElement("button"); b.className="pin"; b.textContent=w.word;
+    b.addEventListener("click", function(){ pickLeft(i,b); }); Lc.appendChild(b);
+  });
+  shuffle(stringPairs.map(function(w,i){return {i:i,m:w.match};})).forEach(function(o){
+    var b=document.createElement("button"); b.className="pin"; b.textContent=o.m;
+    b.addEventListener("click", function(){ pickRight(o.i,b); }); R.appendChild(b);
+  });
+  $("strings").innerHTML="";
+  $("stringScore").textContent="0 of "+stringPairs.length+" linked";
+  setTimeout(drawStrings,30);
+}
+function pickLeft(i,el){ each($("leftCol").children, function(c){c.classList.remove("sel");}); el.classList.add("sel"); stringSel={i:i,el:el}; sClick(); }
+function pickRight(i,el){
+  if(!stringSel){ toast("Tap a word on the left first"); sBad(); return; }
+  if(stringSel.i===i){
+    stringSel.el.classList.add("linked"); stringSel.el.classList.remove("sel"); el.classList.add("linked");
+    stringLinked.push({a:stringSel.el,b:el}); stringSel=null; sGood(); drawStrings();
+    $("stringScore").textContent=stringLinked.length+" of "+stringPairs.length+" linked";
+    if(stringLinked.length===stringPairs.length){ setTimeout(function(){ sWin(); toast("Round complete!"); burst(); },300); }
+  } else { el.classList.add("bad"); sBad(); setTimeout(function(){el.classList.remove("bad");},380); }
+}
+function drawStrings(){
+  var svg=$("strings"), wrap=$("stringWrap"); if(!wrap) return;
+  var wb=wrap.getBoundingClientRect();
+  svg.setAttribute("width",wb.width); svg.setAttribute("height",wb.height); svg.setAttribute("viewBox","0 0 "+wb.width+" "+wb.height);
+  svg.innerHTML="";
+  stringLinked.forEach(function(p){
+    var a=p.a.getBoundingClientRect(), b=p.b.getBoundingClientRect();
+    var x1=a.right-wb.left, y1=a.top+a.height/2-wb.top, x2=b.left-wb.left, y2=b.top+b.height/2-wb.top;
+    var sag=Math.min(34,Math.abs(x2-x1)/7);
+    var path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d","M"+x1+","+y1+" Q"+((x1+x2)/2)+","+((y1+y2)/2+sag)+" "+x2+","+y2);
+    path.setAttribute("stroke","#c0392b"); path.setAttribute("stroke-width","3"); path.setAttribute("fill","none"); path.setAttribute("opacity",".9");
+    svg.appendChild(path);
+    [[x1,y1],[x2,y2]].forEach(function(pt){
+      var c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx",pt[0]); c.setAttribute("cy",pt[1]); c.setAttribute("r","4.5"); c.setAttribute("fill",L().accent); svg.appendChild(c);
+    });
+  });
+}
+$("resetString").addEventListener("click", function(){ buildString(); sClick(); });
+window.addEventListener("resize", function(){ drawStrings(); sizeConfetti(); });
+
+/* ============ QUICK FIRE ============ */
+var qfPool=[];
+function buildQuick(reset){
+  if(reset){ qfPool=shuffle(WORDS().map(function(w,i){return i;})); qfAsked=0; }
+  $("qfPrompt").innerHTML='<div><small>ROUND READY</small>Press \u201CNext question\u201D to begin.</div>';
+  $("qfOpts").innerHTML=""; $("qfScore").textContent=qfAsked+" asked"; $("qfAward").style.visibility="hidden";
+  $("qfTimer").textContent="15"; $("qfTimer").classList.remove("low");
+}
+function stopQfTimer(){ if(qfTimerId){ clearInterval(qfTimerId); qfTimerId=null; } }
+$("qfNext").addEventListener("click", function(){
+  if(!qfPool.length){ qfPool=shuffle(WORDS().map(function(w,i){return i;})); toast("Every word asked \u2014 starting again"); }
+  var idx=qfPool.pop(), w=WORDS()[idx]; qfAnswer=w.word; qfAsked++;
+  var useSyn=Math.random()<0.35;
+  $("qfPrompt").innerHTML='<div><small>'+(useSyn?"WHICH WORD MEANS\u2026":"WHICH WORD IS THIS?")+'</small>'+(useSyn?w.syn:w.def)+'</div>';
+  var others=shuffle(WORDS().filter(function(x){return x.word!==w.word;})).slice(0,3).map(function(x){return x.word;});
+  var opts=shuffle(others.concat([w.word])), box=$("qfOpts"); box.innerHTML="";
+  opts.forEach(function(o){
+    var b=document.createElement("button"); b.className="opt"; b.textContent=o;
+    b.addEventListener("click", function(){
+      if(box.dataset.done) return; box.dataset.done="1"; stopQfTimer();
+      if(o===qfAnswer){ b.classList.add("right"); sGood(); $("qfAward").style.visibility="visible"; }
+      else { b.classList.add("wrong"); sBad(); each(box.children,function(c){ if(c.textContent===qfAnswer) c.classList.add("right"); }); }
+      each(box.children,function(c){ if(!c.classList.contains("right")&&!c.classList.contains("wrong")) c.classList.add("dim"); });
+    });
+    box.appendChild(b);
+  });
+  delete box.dataset.done;
+  $("qfScore").textContent=qfAsked+" asked"; $("qfAward").style.visibility="hidden";
+  qfLeft=15; $("qfTimer").textContent=qfLeft; $("qfTimer").classList.remove("low"); stopQfTimer(); sClick();
+  qfTimerId=setInterval(function(){
+    qfLeft--; $("qfTimer").textContent=qfLeft;
+    if(qfLeft<=5){ $("qfTimer").classList.add("low"); if(qfLeft>0) tone(700,.07,"square",.08); }
+    if(qfLeft<=0){ stopQfTimer(); if(!box.dataset.done){ box.dataset.done="1"; sBad(); toast("Time!"); each(box.children,function(c){ if(c.textContent===qfAnswer) c.classList.add("right"); else c.classList.add("dim"); }); } }
+  },1000);
+});
+each(document.querySelectorAll("#qfAward button"), function(b){
+  b.addEventListener("click", function(){ award(b.getAttribute("data-team")); $("qfAward").style.visibility="hidden"; toast("Point to "+b.textContent); });
+});
+
+/* ============ SCRAMBLE ============ */
+var scrPool=[];
+function buildScrambleIdle(){
+  scrWord=null; scrPlaced=[]; scrPool=[];
+  $("scrHint").innerHTML='<small>MEANING</small>Press \u201CNew word\u201D to start.';
+  $("scrTiles").innerHTML=""; $("scrAnswer").innerHTML=""; $("scrAnswer").className="answer";
+  $("scrScore").textContent=scrSolved+" solved";
+}
+$("scrNew").addEventListener("click", function(){
+  if(!scrPool.length) scrPool=shuffle(WORDS().slice());
+  scrWord=scrPool.pop(); scrPlaced=[];
+  var letters=scrWord.word.toLowerCase().split(""), mixed=shuffle(letters), tries=0;
+  while(mixed.join("")===letters.join("") && tries<8){ mixed=shuffle(letters); tries++; }
+  $("scrHint").innerHTML='<small>MEANING \u00B7 '+scrWord.pos.toUpperCase()+' \u00B7 '+letters.length+' LETTERS</small>'+scrWord.def;
+  var t=$("scrTiles"); t.innerHTML=""; $("scrAnswer").innerHTML=""; $("scrAnswer").className="answer";
+  mixed.forEach(function(ch,i){
+    var b=document.createElement("button"); b.className="tile"; b.textContent=ch; b.setAttribute("data-i",i);
+    b.addEventListener("click", function(){ if(b.classList.contains("gone")) return; b.classList.add("gone"); placeLetter(ch,b); });
+    t.appendChild(b);
+  });
+  sClick();
+});
+function placeLetter(ch,src){
+  var a=$("scrAnswer"); a.className="answer";
+  var b=document.createElement("button"); b.className="tile"; b.textContent=ch; b._src=src;
+  b.addEventListener("click", function(){ undoTo(b); });
+  a.appendChild(b); scrPlaced.push(b); tone(600+scrPlaced.length*40,.06,"sine",.07);
+  if(scrPlaced.length===scrWord.word.length){
+    var got=scrPlaced.map(function(x){return x.textContent;}).join("");
+    if(got===scrWord.word.toLowerCase()){ a.classList.add("right"); scrSolved++; $("scrScore").textContent=scrSolved+" solved"; sWin(); toast(scrWord.word+"!"); }
+    else { a.classList.add("wrong"); sBad(); }
+  }
+}
+function undoTo(b){
+  var a=$("scrAnswer"); a.className="answer";
+  while(scrPlaced.length){ var last=scrPlaced.pop(); last._src.classList.remove("gone"); a.removeChild(last); if(last===b) break; }
+  sClick();
+}
+$("scrUndo").addEventListener("click", function(){ if(scrPlaced.length) undoTo(scrPlaced[scrPlaced.length-1]); });
+$("scrReveal").addEventListener("click", function(){
+  if(!scrWord) return;
+  each($("scrTiles").children,function(t){t.classList.add("gone");});
+  var a=$("scrAnswer"); a.innerHTML=""; scrPlaced=[];
+  scrWord.word.toLowerCase().split("").forEach(function(ch){ var b=document.createElement("button"); b.className="tile"; b.textContent=ch; a.appendChild(b); });
+  a.className="answer right"; sStamp();
+});
+
+/* ============ BINGO ============ */
+function buildBingo(){
+  var n=WORDS().length, rows, cols;
+  if(n>=11){ cols=4; rows=3; } else if(n>=8){ cols=3; rows=3; } else { cols=3; rows=2; }
+  bingoCols=cols;
+  var need=rows*cols-1, picks=shuffle(WORDS().map(function(w){return w.word;})).slice(0,need);
+  picks.splice(Math.floor(Math.random()*(need+1)),0,"FREE \u2605");
+  bingoCalled=[];
+  var g=$("bingoGrid"); g.innerHTML=""; g.style.gridTemplateColumns="repeat("+cols+",1fr)"; delete g.dataset.won;
+  picks.forEach(function(name){
+    var c=document.createElement("button"); c.className="cell"+(name.indexOf("FREE")===0?" free hit":""); c.textContent=name;
+    c.addEventListener("click", function(){ c.classList.toggle("hit"); sClick(); checkBingo(rows,cols); });
+    g.appendChild(c);
+  });
+  $("clueKind").textContent="READY"; $("clueText").textContent="Press \u201CCall a clue\u201D to start the round."; $("calledCount").textContent="0 clues called";
+}
+function checkBingo(rows,cols){
+  var cells=$("bingoGrid").children, i,j,win=false;
+  for(i=0;i<rows;i++){ var rf=true; for(j=0;j<cols;j++){ if(!cells[i*cols+j].classList.contains("hit")) rf=false; } if(rf) win=true; }
+  for(j=0;j<cols;j++){ var cf=true; for(i=0;i<rows;i++){ if(!cells[i*cols+j].classList.contains("hit")) cf=false; } if(cf) win=true; }
+  if(win && !$("bingoGrid").dataset.won){ $("bingoGrid").dataset.won="1"; sWin(); toast("BINGO!"); burst(); }
+}
+$("callBtn").addEventListener("click", function(){
+  var left=WORDS().filter(function(w){return bingoCalled.indexOf(w.word)===-1;});
+  if(!left.length){ toast("Every word has been called"); sBad(); return; }
+  var w=left[Math.floor(Math.random()*left.length)]; bingoCalled.push(w.word);
+  var useSyn=Math.random()<0.4;
+  $("clueKind").textContent=useSyn?"SYNONYM CLUE":"DEFINITION CLUE";
+  $("clueText").textContent=useSyn? w.syn.split(",")[0].trim()+" \u2014 which word is it?" : w.def;
+  $("calledCount").textContent=bingoCalled.length+" of "+WORDS().length+" clues called"; sClick();
+});
+$("newCard").addEventListener("click", function(){ buildBingo(); sClick(); });
+
+/* ============ CHARADES ============ */
+function stopCharTimer(){ if(charTimerId){ clearInterval(charTimerId); charTimerId=null; $("timerBtn").textContent="Start 60 seconds"; } $("charTimer").textContent="60"; $("charTimer").classList.remove("low"); }
+$("peekBtn").addEventListener("click", drawCard);
+$("actCard").addEventListener("click", drawCard);
+function drawCard(){
+  var card=$("actCard"); if(card.dataset.busy) return; card.dataset.busy="1";
+  var pool=WORDS().map(function(w){return w.word;}); charWord=pool[Math.floor(Math.random()*pool.length)];
+  var spins=12,n=0;
+  var spin=setInterval(function(){
+    card.innerHTML='<p class="back">DRAWING\u2026</p><p class="big">'+pool[n%pool.length]+'</p><p class="back">&nbsp;</p>'; n++;
+    if(n>spins){
+      clearInterval(spin); var t=3;
+      card.innerHTML='<p class="back">ACTOR ONLY \u2014 EVERYONE ELSE LOOK AWAY</p><p class="big">'+charWord+'</p><p class="cd">'+t+'</p>'; sStamp();
+      var cd=setInterval(function(){
+        t--;
+        if(t>0){ card.querySelector(".cd").textContent=t; tone(440,.07,"sine",.08); }
+        else { clearInterval(cd); card.innerHTML='<p class="back">CARD HIDDEN</p><p class="big">Act it out!</p><p class="back">no talking \u2014 face and body only</p>'; delete card.dataset.busy; }
+      },800);
+    }
+  },70);
+}
+$("timerBtn").addEventListener("click", function(){
+  if(charTimerId){ stopCharTimer(); return; }
+  charLeft=60; $("charTimer").textContent=charLeft; $("charTimer").classList.remove("low"); $("timerBtn").textContent="Stop timer";
+  charTimerId=setInterval(function(){
+    charLeft--; $("charTimer").textContent=charLeft;
+    if(charLeft<=10) $("charTimer").classList.add("low");
+    if(charLeft<=5&&charLeft>0) tone(700,.08,"square",.09);
+    if(charLeft<=0){ clearInterval(charTimerId); charTimerId=null; $("timerBtn").textContent="Start 60 seconds"; sBad(); toast("Time!"); }
+  },1000);
+});
+
+/* ============ FINALE ============ */
+function buildWall(){
+  var w=$("wordWall"); w.innerHTML="";
+  WORDS().forEach(function(x){ var s=document.createElement("span"); s.textContent=x.word; w.appendChild(s); });
+  $("finaleText").textContent="You cracked all "+WORDS().length+" words in "+L().name+" like true word detectives. Use one of them correctly before tomorrow\u2019s class.";
+}
+$("celebrate").addEventListener("click", function(){ burst(); sWin(); });
+
+/* ============ CONFETTI ============ */
+var cvs=$("confetti"), ctx=null, bits=[], raf=null;
+try{ ctx=cvs.getContext("2d"); }catch(e){}
+function sizeConfetti(){ cvs.width=window.innerWidth; cvs.height=window.innerHeight; }
+sizeConfetti();
+function burst(){
+  if(!ctx) return;
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  cvs.style.display="block";
+  var colors=[L().accent,"#c0392b","#37a68b","#f1e3c3","#ffffff"];
+  for(var i=0;i<130;i++){
+    bits.push({x:window.innerWidth/2+(Math.random()-.5)*260,y:window.innerHeight*0.55,vx:(Math.random()-.5)*11,vy:-Math.random()*15-5,s:5+Math.random()*7,c:colors[Math.floor(Math.random()*colors.length)],r:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,life:150});
+  }
+  if(!raf) raf=requestAnimationFrame(tick);
+}
+function tick(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(var i=bits.length-1;i>=0;i--){
+    var b=bits[i]; b.vy+=0.42; b.x+=b.vx; b.y+=b.vy; b.r+=b.vr; b.life--;
+    ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle=b.c; ctx.fillRect(-b.s/2,-b.s/2,b.s,b.s*0.6); ctx.restore();
+    if(b.life<=0||b.y>cvs.height+40) bits.splice(i,1);
+  }
+  if(bits.length) raf=requestAnimationFrame(tick); else { raf=null; cvs.style.display="none"; }
+}
+
+/* ============ INTRO ============ */
+$("startBtn").addEventListener("click", function(){
+  $("intro").classList.add("fadeout"); setTimeout(function(){ $("intro").style.display="none"; },500);
+  buildPicker(); $("picker").classList.add("open"); sClick();
+});
+
+/* ============ BOOT ============ */
+selectList(0);
+</script>
+</body>
+</html>
