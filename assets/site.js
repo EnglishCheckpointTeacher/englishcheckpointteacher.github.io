@@ -102,7 +102,7 @@
           <span class="logo-mark">${ic("logo")}</span>
           <span class="logo-text"><b>English Checkpoint</b><small>Cambridge exam preparation</small></span>
         </a>
-        <p>Independent revision and practice materials for Cambridge Checkpoint English, written by Ms. Hnan Khalid.</p>
+        <p>Independent revision and practice materials for Cambridge Checkpoint English, written by Ms. Hanan Khalid.</p>
       </div>
       <div>
         <h4>Primary · Stage 6</h4>
@@ -127,7 +127,7 @@
         </ul>
       </div>
     </div>
-    <div class="base"><span>© ${new Date().getFullYear()} Ms. Hnan Khalid · English Checkpoint</span><span>An independent site, not affiliated with or endorsed by Cambridge University Press &amp; Assessment</span></div>
+    <div class="base"><span>© ${new Date().getFullYear()} Ms. Hanan Khalid · English Checkpoint</span><span>An independent site, not affiliated with or endorsed by Cambridge University Press &amp; Assessment</span></div>
   </div>
 </footer>
 <button class="icon-btn to-top" type="button" aria-label="Back to top">${ic("up")}</button>`;
