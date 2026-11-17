@@ -47,6 +47,8 @@
       <a href="index.html"${cur === "home" ? ' aria-current="page"' : ""}>Home</a>
       ${menu("primary", "Primary", cur)}
       ${menu("secondary", "Lower Secondary", cur)}
+      <a href="past-papers.html"${cur === "past-papers" ? ' aria-current="page"' : ""}>Past papers</a>
+      <a href="skills-gym.html"${cur === "skills-gym" ? ' aria-current="page"' : ""}>Skills gym</a>
       <a href="glossary.html"${cur === "glossary" ? ' aria-current="page"' : ""}>Glossary</a>
     </nav>
     <button class="icon-btn theme-btn" type="button" aria-label="Switch between light and dark theme">${ic("moon", "i-moon")}${ic("sun", "i-sun")}</button>
@@ -121,6 +123,10 @@
       <div>
         <h4>Study tools</h4>
         <ul>
+          <li><a href="past-papers.html">Past papers explained</a></li>
+          <li><a href="mock-paper-1.html">Mock Paper 1 · Non-fiction</a></li>
+          <li><a href="mock-paper-2.html">Mock Paper 2 · Fiction</a></li>
+          <li><a href="skills-gym.html">Skills gym</a></li>
           <li><a href="glossary.html">Glossary of English terms</a></li>
           <li><a href="index.html#which">First or Second Language?</a></li>
           <li><a href="index.html#faq">Questions and answers</a></li>
@@ -172,7 +178,7 @@
         current = now.id;
         links.forEach((a, id) => a.classList.toggle("on", id === current));
         const a = links.get(current), list = toc.querySelector("ol");
-        if (list.scrollWidth > list.clientWidth) list.scrollTo({ left: a.offsetLeft - list.offsetLeft - 40, behavior: "smooth" });
+        if (list.scrollWidth > list.clientWidth) list.scrollLeft = a.offsetLeft - list.offsetLeft - 40;
       };
       addEventListener("scroll", spy, { passive: true });
       spy();
